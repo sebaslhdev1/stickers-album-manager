@@ -199,30 +199,32 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className='space-y-6'>
-            <div className='flex justify-center'>
-              <InputOTP maxLength={6} value={otp} onChange={setOtp} autoFocus>
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} className='h-12 w-10 text-base' />
-                  <InputOTPSlot index={1} className='h-12 w-10 text-base' />
-                  <InputOTPSlot index={2} className='h-12 w-10 text-base' />
-                  <InputOTPSlot index={3} className='h-12 w-10 text-base' />
-                  <InputOTPSlot index={4} className='h-12 w-10 text-base' />
-                  <InputOTPSlot index={5} className='h-12 w-10 text-base' />
-                </InputOTPGroup>
-              </InputOTP>
-            </div>
+            <form onSubmit={(e) => { e.preventDefault(); handleVerify() }} className='space-y-6'>
+              <div className='flex justify-center'>
+                <InputOTP maxLength={6} value={otp} onChange={setOtp} onComplete={handleVerify} autoFocus>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} className='h-12 w-10 text-base' />
+                    <InputOTPSlot index={1} className='h-12 w-10 text-base' />
+                    <InputOTPSlot index={2} className='h-12 w-10 text-base' />
+                    <InputOTPSlot index={3} className='h-12 w-10 text-base' />
+                    <InputOTPSlot index={4} className='h-12 w-10 text-base' />
+                    <InputOTPSlot index={5} className='h-12 w-10 text-base' />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
 
-            {error && (
-              <p className='text-center text-sm text-destructive'>{error}</p>
-            )}
+              {error && (
+                <p className='text-center text-sm text-destructive'>{error}</p>
+              )}
 
-            <Button
-              onClick={handleVerify}
-              className='w-full'
-              disabled={otp.length < 6 || isLoading}
-            >
-              {isLoading ? "Verifying…" : "Verify"}
-            </Button>
+              <Button
+                type='submit'
+                className='w-full'
+                disabled={otp.length < 6 || isLoading}
+              >
+                {isLoading ? "Verifying…" : "Verify"}
+              </Button>
+            </form>
 
             <p className='text-center text-xs text-muted-foreground'>
               Didn&apos;t receive the code?{" "}

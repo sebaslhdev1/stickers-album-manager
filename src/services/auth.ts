@@ -1,5 +1,5 @@
 import { api } from "@/lib/api"
-import { setToken } from "@/lib/token"
+import { removeToken, setToken } from "@/lib/token"
 
 export async function signUp(name: string, email: string): Promise<void> {
   await api.post("/signup_user", { name, email })
@@ -7,6 +7,11 @@ export async function signUp(name: string, email: string): Promise<void> {
 
 export async function signIn(email: string): Promise<void> {
   await api.post("/sign_in_user", { email })
+}
+
+export function logout(): void {
+  removeToken();
+  // TODO: call server-side logout endpoint if needed
 }
 
 export async function verifyOtp(email: string, token: string): Promise<void> {
