@@ -8,7 +8,14 @@ import { getErrorMessage } from "@/lib/errors"
 import { getAlbum } from "@/services/albums"
 import { getStickers, saveStickers } from "@/services/stickers"
 import type { Album, AlbumColors, Sticker } from "@/types"
-import { ArrowLeft, CheckCircle2, List, RotateCcw, Save, Trophy } from "lucide-react"
+import {
+  ArrowLeft,
+  CheckCircle2,
+  List,
+  RotateCcw,
+  Save,
+  Trophy,
+} from "lucide-react"
 import Image from "next/image"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
@@ -43,8 +50,12 @@ export default function AlbumPage() {
       .then(([albumData, stickersData]) => {
         setAlbum(albumData)
         setStickers(stickersData)
-        originalAmounts.current = new Map(stickersData.map((s) => [s.id, s.amount]))
-        setSavedCompleted(new Set(stickersData.filter((s) => s.amount > 0).map((s) => s.id)))
+        originalAmounts.current = new Map(
+          stickersData.map((s) => [s.id, s.amount]),
+        )
+        setSavedCompleted(
+          new Set(stickersData.filter((s) => s.amount > 0).map((s) => s.id)),
+        )
       })
       .catch((err) => setLoadError(getErrorMessage(err)))
       .finally(() => setIsLoading(false))
@@ -120,7 +131,8 @@ export default function AlbumPage() {
     const wasComplete =
       stickers.length > 0 &&
       stickers.every((s) => (originalAmounts.current.get(s.id) ?? 0) > 0)
-    const willBeComplete = stickers.length > 0 && stickers.every((s) => s.amount > 0)
+    const willBeComplete =
+      stickers.length > 0 && stickers.every((s) => s.amount > 0)
     setIsSaving(true)
     setSaveError(null)
     try {
@@ -155,7 +167,8 @@ export default function AlbumPage() {
     repeated: stickers.filter((s) => s.amount > 1).length,
   }
 
-  const isComplete = stickers.length > 0 && savedCompleted.size === stickers.length
+  const isComplete =
+    stickers.length > 0 && savedCompleted.size === stickers.length
 
   async function fireConfetti() {
     const confetti = (await import("canvas-confetti")).default
@@ -259,7 +272,7 @@ export default function AlbumPage() {
                 <Trophy className='h-4 w-4 text-white' />
               </div>
             )}
-            <div className='flex items-end gap-6 p-6'>
+            <div className='flex items-center md:items-end gap-6 p-6'>
               <div className='relative h-36 w-24 shrink-0 overflow-hidden rounded-xl shadow-2xl ring-2 ring-white/20'>
                 <Image
                   src={album.image_url}
