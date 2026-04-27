@@ -138,6 +138,7 @@ export default function AlbumPage() {
       setDirty(new Set())
       setRefreshKey((k) => k + 1)
       if (!wasComplete && willBeComplete) {
+        window.scrollTo({ top: 0, behavior: "smooth" })
         fireConfetti()
       }
     } catch (err) {
