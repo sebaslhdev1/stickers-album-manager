@@ -1,68 +1,32 @@
-"use client"
-
-import { getErrorMessage } from "@/lib/errors"
-import { getAlbumStats } from "@/services/albums"
+import { Skeleton } from "@/components/ui/skeleton"
 import type { Album, AlbumColors, AlbumStats } from "@/types"
 import {
   CheckCircle2,
   CircleDashed,
   Copy,
   Layers,
-  Loader2,
   Trophy,
 } from "lucide-react"
 import Link from "next/link"
-import { useEffect, useState } from "react"
 
 export function AlbumStatsPanel({
   album,
   colors,
+  stats,
 }: {
   album: Album
   colors: AlbumColors
+  stats: AlbumStats | null | undefined
 }) {
-  const [state, setState] = useState<{
-    albumId: string
-    stats?: AlbumStats
-    error?: string
-  } | null>(null)
-
-  const isLoading = state?.albumId !== album.id
-  const stats = state?.stats
-  const error = state?.error
-
-  useEffect(() => {
-    getAlbumStats(album.id)
-      .then((stats) => setState({ albumId: album.id, stats }))
-      .catch((err) => setState({ albumId: album.id, error: getErrorMessage(err) }))
-  }, [album.id])
+  const isLoading = stats === undefined
+  const hasError = stats === null
 
   const statTiles = stats
     ? [
-        {
-          label: "Total stickers",
-          value: stats.total,
-          color: colors.primary,
-          Icon: Layers,
-        },
-        {
-          label: "Collected",
-          value: stats.collected,
-          color: colors.primary,
-          Icon: CheckCircle2,
-        },
-        {
-          label: "Missing",
-          value: stats.missing,
-          color: colors.accent,
-          Icon: CircleDashed,
-        },
-        {
-          label: "Repeated",
-          value: stats.repeated,
-          color: colors.accent,
-          Icon: Copy,
-        },
+        { label: "Total stickers", value: stats.total, color: colors.primary, Icon: Layers },
+        { label: "Collected", value: stats.collected, color: colors.primary, Icon: CheckCircle2 },
+        { label: "Missing", value: stats.missing, color: colors.accent, Icon: CircleDashed },
+        { label: "Repeated", value: stats.repeated, color: colors.accent, Icon: Copy },
       ]
     : []
 
@@ -91,19 +55,28 @@ export function AlbumStatsPanel({
         </div>
 
         {isLoading ? (
-          <div className='flex items-center justify-center py-14'>
-            <Loader2
-              className='h-5 w-5 animate-spin'
-              style={{ color: colors.primary }}
-            />
+          <div className='space-y-6 p-6'>
+            <div className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className='h-24 rounded-xl' />
+              ))}
+            </div>
+            <div className='space-y-2'>
+              <div className='flex justify-between'>
+                <Skeleton className='h-4 w-16' />
+                <Skeleton className='h-4 w-10' />
+              </div>
+              <Skeleton className='h-3 w-full rounded-full' />
+            </div>
           </div>
-        ) : error ? (
+        ) : hasError ? (
           <div className='flex items-center justify-center py-14'>
-            <p className='text-sm text-destructive'>{error}</p>
+            <p className='text-sm font-bold' style={{ color: colors.primary }}>
+              Could not load stats.
+            </p>
           </div>
         ) : stats ? (
           <div className='space-y-6 p-6'>
-            {/* Stat tiles */}
             <div className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
               {statTiles.map(({ label, value, color, Icon }) => (
                 <div
@@ -115,26 +88,19 @@ export function AlbumStatsPanel({
                   <p className='text-2xl font-bold' style={{ color }}>
                     {value}
                   </p>
-                  <p
-                    className='mt-0.5 text-xs'
-                    style={{ color: colors.secondary }}
-                  >
+                  <p className='mt-0.5 text-xs' style={{ color: colors.secondary }}>
                     {label}
                   </p>
                 </div>
               ))}
             </div>
 
-            {/* Progress bar */}
             <div className='space-y-1.5'>
               <div className='flex items-center justify-between text-sm'>
                 <span className='font-medium' style={{ color: colors.primary }}>
                   Progress
                 </span>
-                <span
-                  className='font-semibold'
-                  style={{ color: colors.accent }}
-                >
+                <span className='font-semibold' style={{ color: colors.accent }}>
                   {stats.progress}%
                 </span>
               </div>
@@ -144,10 +110,7 @@ export function AlbumStatsPanel({
               >
                 <div
                   className='h-full rounded-full transition-all duration-700'
-                  style={{
-                    width: `${stats.progress}%`,
-                    backgroundColor: colors.primary,
-                  }}
+                  style={{ width: `${stats.progress}%`, backgroundColor: colors.primary }}
                 />
               </div>
             </div>

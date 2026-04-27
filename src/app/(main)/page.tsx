@@ -2,10 +2,11 @@
 
 import { AlbumCard } from "@/components/albums/album-card"
 import { AlbumStatsPanel } from "@/components/albums/album-stats-panel"
-import { getAlbums } from "@/services/albums"
-import type { Album, AlbumColors } from "@/types"
-import { BookOpen, Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { getAlbumStats, getAlbums } from "@/services/albums"
+import type { Album, AlbumColors, AlbumStats } from "@/types"
+import { Skeleton } from "@/components/ui/skeleton"
+import { BookOpen } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 
 const NAMED_PALETTES: Record<string, AlbumColors> = {
   "2026": {
@@ -61,6 +62,8 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null)
+  const [albumStats, setAlbumStats] = useState<Record<string, AlbumStats | null>>({})
+  const fetchedIds = useRef(new Set<string>())
 
   useEffect(() => {
     getAlbums()
@@ -71,6 +74,22 @@ export default function HomePage() {
       .catch(() => setError("Could not load albums. Please try again."))
       .finally(() => setIsLoading(false))
   }, [])
+
+  const selectedAlbumId = selectedAlbum?.id ?? null
+
+  useEffect(() => {
+    if (!selectedAlbumId || fetchedIds.current.has(selectedAlbumId)) return
+    fetchedIds.current.add(selectedAlbumId)
+    getAlbumStats(selectedAlbumId)
+      .then((s) => setAlbumStats((prev) => ({ ...prev, [selectedAlbumId]: s })))
+      .catch(() => setAlbumStats((prev) => ({ ...prev, [selectedAlbumId]: null })))
+  }, [selectedAlbumId])
+
+  const completedAlbumIds = new Set(
+    Object.entries(albumStats)
+      .filter(([, s]) => s !== null && s.total > 0 && s.collected === s.total)
+      .map(([id]) => id),
+  )
 
   const resolvedColors = selectedAlbum
     ? (selectedAlbum.colors ?? getMockColors(selectedAlbum))
@@ -104,8 +123,10 @@ export default function HomePage() {
 
       {/* Content */}
       {isLoading ? (
-        <div className='flex items-center justify-center py-32'>
-          <Loader2 className='h-7 w-7 animate-spin text-muted-foreground' />
+        <div className='grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4'>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="aspect-3/4 w-full rounded-2xl" />
+          ))}
         </div>
       ) : error ? (
         <div className='py-32 text-center'>
@@ -128,6 +149,7 @@ export default function HomePage() {
               key={album.id}
               album={album}
               selected={selectedAlbum?.id === album.id}
+              isComplete={completedAlbumIds.has(album.id)}
               onSelect={() =>
                 setSelectedAlbum((prev) =>
                   prev?.id === album.id ? null : album,
@@ -139,7 +161,11 @@ export default function HomePage() {
       )}
 
       {selectedAlbum && resolvedColors && (
-        <AlbumStatsPanel album={selectedAlbum} colors={resolvedColors} />
+        <AlbumStatsPanel
+          album={selectedAlbum}
+          colors={resolvedColors}
+          stats={albumStats[selectedAlbum.id]}
+        />
       )}
     </div>
   )

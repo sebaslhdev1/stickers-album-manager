@@ -20,6 +20,20 @@ export async function getStickers(albumId: string): Promise<Sticker[]> {
   }))
 }
 
+export async function getMissingStickers(albumId: string): Promise<string[]> {
+  const res = await api.get<{ missing: string }>("/get_missing_stickers", {
+    params: { album_id: albumId },
+  })
+  return res.data.missing.split(", ").filter(Boolean)
+}
+
+export async function getRepeatedStickers(albumId: string): Promise<string[]> {
+  const res = await api.get<{ repeated: string }>("/get_repeated_stickers", {
+    params: { album_id: albumId },
+  })
+  return res.data.repeated.split(", ").filter(Boolean)
+}
+
 export async function saveStickers(
   albumId: string,
   stickers: Pick<Sticker, "id" | "number" | "amount">[]

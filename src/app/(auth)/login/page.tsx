@@ -17,11 +17,11 @@ import {
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { signIn, signUp, verifyOtp } from "@/services/auth"
-import { ArrowLeft, Trophy } from "lucide-react"
+import { ArrowLeft, CheckCircle2, Trophy } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-type View = "auth" | "verify"
+type View = "auth" | "verify" | "signup-success"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -56,7 +56,7 @@ export default function LoginPage() {
     setIsLoading(true)
     try {
       await signUp(name, email)
-      // TODO: redirect or show success message after sign up
+      setView("signup-success")
     } catch {
       setError("Could not create your account. Please try again.")
     } finally {
@@ -98,7 +98,27 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {view === "auth" ? (
+      {view === "signup-success" ? (
+        <Card className='border-0 bg-white/95 shadow-2xl shadow-black/40 backdrop-blur-sm'>
+          <CardHeader className='items-center text-center'>
+            <div className='mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-green-100'>
+              <CheckCircle2 className='h-7 w-7 text-green-600' />
+            </div>
+            <CardTitle className='text-lg'>Account created!</CardTitle>
+            <CardDescription>
+              Your account is ready. Sign in to start managing your collection.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              className='w-full py-5'
+              onClick={() => { setView("auth"); setError("") }}
+            >
+              Go to Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      ) : view === "auth" ? (
         <Card className='border-0 bg-white/95 shadow-2xl shadow-black/40 backdrop-blur-sm'>
           <CardContent className='pt-2'>
             <Tabs defaultValue='signin' className='w-full'>
