@@ -164,7 +164,7 @@ export default function AlbumPage() {
     total: stickers.length,
     collected: stickers.filter((s) => s.amount > 0).length,
     missing: stickers.filter((s) => s.amount === 0).length,
-    repeated: stickers.filter((s) => s.amount > 1).length,
+    repeated: stickers.reduce((sum, s) => sum + Math.max(0, s.amount - 1), 0),
   }
 
   const isComplete =
