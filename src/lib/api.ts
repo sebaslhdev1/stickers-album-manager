@@ -3,12 +3,10 @@ import { getToken, removeToken } from "@/lib/token";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
-const REQUEST_TIMEOUT_MS = 7000;
 
 export const api = axios.create({
   baseURL: "/api",
   headers: { "Content-Type": "application/json" },
-  timeout: REQUEST_TIMEOUT_MS,
 });
 
 api.interceptors.request.use((config) => {
@@ -27,14 +25,9 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Retry on 503 or timeout/network error — handles backend cold start
-    const isUnavailable =
-      error.response?.status === 503 ||
-      error.code === "ECONNABORTED" ||
-      !error.response;
-
+    // Retry on 503 — handles backend cold start
     const config = error.config;
-    if (isUnavailable) {
+    if (error.response?.status === 503) {
       config._retries = (config._retries ?? 0) + 1;
       if (config._retries <= MAX_RETRIES) {
         if (config._retries === 1) {
