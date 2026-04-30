@@ -8,12 +8,14 @@ export function ServiceWakingBanner() {
 
   useEffect(() => {
     const onWaking = () => setVisible(true)
-    const onReady = () => setVisible(false)
+    const onHide = () => setVisible(false)
     window.addEventListener("service:waking", onWaking)
-    window.addEventListener("service:ready", onReady)
+    window.addEventListener("service:ready", onHide)
+    window.addEventListener("service:failed", onHide)
     return () => {
       window.removeEventListener("service:waking", onWaking)
-      window.removeEventListener("service:ready", onReady)
+      window.removeEventListener("service:ready", onHide)
+      window.removeEventListener("service:failed", onHide)
     }
   }, [])
 
