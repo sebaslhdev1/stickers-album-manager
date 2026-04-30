@@ -41,6 +41,8 @@ api.interceptors.response.use(
           return Promise.reject(retryError);
         }
       }
+      // All retries exhausted
+      window.dispatchEvent(new CustomEvent("service:failed"));
     }
 
     return Promise.reject(error);
