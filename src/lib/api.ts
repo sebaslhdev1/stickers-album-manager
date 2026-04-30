@@ -1,6 +1,9 @@
 import axios from "axios";
 import { getToken, removeToken } from "@/lib/token";
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
+
 export const api = axios.create({
   baseURL: "/api",
   headers: { "Content-Type": "application/json" },
@@ -14,11 +17,32 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
       removeToken();
       window.dispatchEvent(new CustomEvent("auth:expired"));
+      return Promise.reject(error);
     }
+
+    // Retry on 503 — handles backend cold start (Render free tier)
+    const config = error.config;
+    if (error.response?.status === 503) {
+      config._retries = (config._retries ?? 0) + 1;
+      if (config._retries <= MAX_RETRIES) {
+        if (config._retries === 1) {
+          window.dispatchEvent(new CustomEvent("service:waking"));
+        }
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+        try {
+          const response = await api(config);
+          window.dispatchEvent(new CustomEvent("service:ready"));
+          return response;
+        } catch (retryError) {
+          return Promise.reject(retryError);
+        }
+      }
+    }
+
     return Promise.reject(error);
   }
 );
