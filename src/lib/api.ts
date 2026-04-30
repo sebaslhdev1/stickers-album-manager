@@ -22,6 +22,7 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       removeToken();
+      window.dispatchEvent(new CustomEvent("service:ready"));
       window.dispatchEvent(new CustomEvent("auth:expired"));
       return Promise.reject(error);
     }
