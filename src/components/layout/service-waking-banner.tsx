@@ -23,7 +23,7 @@ export function ServiceWakingBanner() {
 
   return (
     <div className='fixed bottom-6 left-1/2 z-50 -translate-x-1/2'>
-      <div className='flex items-center gap-2.5 rounded-full bg-gray-900 px-4 py-2.5 text-sm text-white shadow-xl'>
+      <div className='flex items-center gap-2.5 rounded-full px-4 py-2.5 text-sm text-white shadow-xl' style={{ backgroundColor: 'var(--brand-dark)' }}>
         <Loader2 className='h-4 w-4 animate-spin text-white/70' />
         <span>Connecting to server, please wait…</span>
       </div>

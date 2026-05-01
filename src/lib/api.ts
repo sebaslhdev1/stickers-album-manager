@@ -25,8 +25,16 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Retry on 503 — handles backend cold start
     const config = error.config;
+
+    // Single retry on 500 — covers transient server errors
+    if (error.response?.status === 500 && !config._retried500) {
+      config._retried500 = true;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return api(config);
+    }
+
+    // Retry on 503 — handles backend cold start
     if (error.response?.status === 503) {
       config._retries = (config._retries ?? 0) + 1;
       if (config._retries <= MAX_RETRIES) {

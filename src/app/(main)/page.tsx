@@ -99,26 +99,26 @@ export default function HomePage() {
     <div className='mx-auto max-w-6xl px-6 py-12'>
       {/* Page header */}
       <div className='mb-10'>
-        <p className='mb-2 text-xs font-semibold uppercase tracking-widest text-primary'>
+        <p className='mb-2 text-xs font-semibold uppercase tracking-widest' style={{ color: 'var(--brand-orange)' }}>
           My Collection
         </p>
         <div className='flex items-end justify-between'>
-          <h1 className='text-5xl font-bold tracking-tight'>Albums</h1>
+          <h1 className='text-5xl font-bold tracking-tight' style={{ color: 'var(--brand-dark)' }}>Albums</h1>
           {!isLoading && albums.length > 0 && (
             <div className='text-right'>
-              <span className='text-4xl font-bold text-primary'>
+              <span className='text-4xl font-bold' style={{ color: 'var(--brand-orange)' }}>
                 {albums.length}
               </span>
-              <p className='mt-0.5 text-xs text-muted-foreground'>
+              <p className='mt-0.5 text-xs' style={{ color: 'var(--brand-muted)' }}>
                 {albums.length === 1 ? "album" : "albums"} available
               </p>
             </div>
           )}
         </div>
-        <p className='mt-3 text-muted-foreground'>
+        <p className='mt-3' style={{ color: 'var(--brand-muted)' }}>
           Select an album to explore your sticker collection.
         </p>
-        <div className='mt-6 h-px bg-linear-to-r from-primary/30 via-primary/10 to-transparent' />
+        <div className='mt-6 h-px' style={{ background: 'linear-gradient(to right, color-mix(in srgb, var(--brand-orange) 40%, transparent), color-mix(in srgb, var(--brand-orange) 10%, transparent), transparent)' }} />
       </div>
 
       {/* Content */}
@@ -150,11 +150,7 @@ export default function HomePage() {
               album={album}
               selected={selectedAlbum?.id === album.id}
               isComplete={completedAlbumIds.has(album.id)}
-              onSelect={() =>
-                setSelectedAlbum((prev) =>
-                  prev?.id === album.id ? null : album,
-                )
-              }
+              onSelect={() => setSelectedAlbum(album)}
             />
           ))}
         </div>

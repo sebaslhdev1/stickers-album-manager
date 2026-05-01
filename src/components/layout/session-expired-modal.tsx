@@ -29,8 +29,8 @@ export function SessionExpiredModal() {
       {/* Modal */}
       <div className='relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl'>
         <div className='flex flex-col items-center gap-4 p-8 text-center'>
-          <div className='flex h-14 w-14 items-center justify-center rounded-full bg-amber-100'>
-            <ShieldAlert className='h-7 w-7 text-amber-500' />
+          <div className='flex h-14 w-14 items-center justify-center rounded-full' style={{ backgroundColor: 'color-mix(in srgb, var(--brand-orange) 15%, transparent)' }}>
+            <ShieldAlert className='h-7 w-7' style={{ color: 'var(--brand-orange)' }} />
           </div>
           <div className='space-y-1.5'>
             <h2 className='text-lg font-bold tracking-tight'>Session expired</h2>
@@ -40,7 +40,8 @@ export function SessionExpiredModal() {
           </div>
           <button
             onClick={handleGoToLogin}
-            className='mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90'
+            className='mt-2 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90'
+            style={{ backgroundColor: 'var(--brand-orange)' }}
           >
             <LogIn className='h-4 w-4' />
             Go to Login

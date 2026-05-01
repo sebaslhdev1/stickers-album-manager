@@ -87,13 +87,16 @@ export default function LoginPage() {
     <div className='mx-auto w-full max-w-sm'>
       {/* Branding */}
       <div className='mb-8 text-center'>
-        <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-900/50'>
+        <div
+          className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg'
+          style={{ background: 'linear-gradient(135deg, var(--brand-orange) 0%, #c96a22 100%)', boxShadow: '0 8px 24px color-mix(in srgb, var(--brand-orange) 35%, transparent)' }}
+        >
           <Trophy className='h-8 w-8 text-white' />
         </div>
         <h1 className='text-2xl font-bold tracking-tight text-white'>
           Sticker Album
         </h1>
-        <p className='mt-1 text-sm text-slate-400'>
+        <p className='mt-1 text-sm' style={{ color: 'var(--brand-muted)' }}>
           Manage your world cup collection
         </p>
       </div>
@@ -101,8 +104,8 @@ export default function LoginPage() {
       {view === "signup-success" ? (
         <Card className='border-0 bg-white/95 shadow-2xl shadow-black/40 backdrop-blur-sm'>
           <CardHeader className='items-center text-center'>
-            <div className='mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-green-100'>
-              <CheckCircle2 className='h-7 w-7 text-green-600' />
+            <div className='mb-2 flex h-14 w-14 items-center justify-center rounded-full' style={{ backgroundColor: 'color-mix(in srgb, var(--brand-green) 15%, transparent)' }}>
+              <CheckCircle2 className='h-7 w-7' style={{ color: 'var(--brand-green)' }} />
             </div>
             <CardTitle className='text-lg'>Account created!</CardTitle>
             <CardDescription>
@@ -112,6 +115,7 @@ export default function LoginPage() {
           <CardContent>
             <Button
               className='w-full py-5'
+              style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
               onClick={() => { setView("auth"); setError("") }}
             >
               Go to Sign In
@@ -150,6 +154,7 @@ export default function LoginPage() {
                   <Button
                     type='submit'
                     className='w-full py-5'
+                    style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
                     disabled={isLoading}
                   >
                     {isLoading ? "Sending code…" : "Send code"}
@@ -190,6 +195,7 @@ export default function LoginPage() {
                   <Button
                     type='submit'
                     className='w-full py-5'
+                    style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
                     disabled={isLoading}
                   >
                     {isLoading ? "Creating account…" : "Create account"}
@@ -240,6 +246,7 @@ export default function LoginPage() {
               <Button
                 type='submit'
                 className='w-full'
+                style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
                 disabled={otp.length < 6 || isLoading}
               >
                 {isLoading ? "Verifying…" : "Verify"}

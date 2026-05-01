@@ -28,8 +28,8 @@ export function ServiceFailedModal() {
       <div className='absolute inset-0 bg-black/50 backdrop-blur-sm' />
       <div className='relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl'>
         <div className='flex flex-col items-center gap-4 p-8 text-center'>
-          <div className='flex h-14 w-14 items-center justify-center rounded-full bg-red-100'>
-            <ServerCrash className='h-7 w-7 text-red-500' />
+          <div className='flex h-14 w-14 items-center justify-center rounded-full' style={{ backgroundColor: 'color-mix(in srgb, var(--brand-muted) 15%, transparent)' }}>
+            <ServerCrash className='h-7 w-7' style={{ color: 'var(--brand-muted)' }} />
           </div>
           <div className='space-y-1.5'>
             <h2 className='text-lg font-bold tracking-tight'>
@@ -42,7 +42,8 @@ export function ServiceFailedModal() {
           </div>
           <button
             onClick={handleSignOut}
-            className='mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90'
+            className='mt-2 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90'
+            style={{ backgroundColor: 'var(--brand-dark)' }}
           >
             <LogIn className='h-4 w-4' />
             Sign out and go to Login

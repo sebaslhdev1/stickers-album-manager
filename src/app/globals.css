@@ -49,6 +49,10 @@
 }
 
 :root {
+  --brand-dark: #363638;
+  --brand-orange: #e07e35;
+  --brand-green: #609662;
+  --brand-muted: #6e726b;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
