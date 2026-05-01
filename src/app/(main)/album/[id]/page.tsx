@@ -4,6 +4,7 @@ import { StickerCard } from "@/components/stickers/sticker-card"
 import { StickersDetailPanel } from "@/components/stickers/stickers-detail-panel"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ROUTES } from "@/constants"
+import { useT } from "@/i18n/use-t"
 import { getErrorMessage } from "@/lib/errors"
 import { getAlbum } from "@/services/albums"
 import { getStickers, saveStickers } from "@/services/stickers"
@@ -31,6 +32,7 @@ const DEFAULT_COLORS: AlbumColors = {
 export default function AlbumPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
+  const t = useT()
   const [album, setAlbum] = useState<Album | null>(null)
   const [stickers, setStickers] = useState<Sticker[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -63,12 +65,11 @@ export default function AlbumPage() {
 
   useEffect(() => {
     if (!isLoading) {
-      const t = setTimeout(() => setMounted(true), 50)
-      return () => clearTimeout(t)
+      const timer = setTimeout(() => setMounted(true), 50)
+      return () => clearTimeout(timer)
     }
   }, [isLoading])
 
-  // Warn before leaving with unsaved changes
   useEffect(() => {
     if (dirty.size === 0) return
     const handler = (e: BeforeUnloadEvent) => {
@@ -199,16 +200,13 @@ export default function AlbumPage() {
   if (isLoading) {
     return (
       <div className='mx-auto max-w-5xl px-6 py-8'>
-        {/* Header skeleton */}
         <Skeleton className='mb-6 h-4 w-28 rounded-full' />
         <Skeleton className='mb-8 h-44 w-full rounded-2xl' />
-        {/* Filter bar skeleton */}
         <div className='mb-6 flex gap-2'>
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className='h-7 w-16 rounded-full' />
           ))}
         </div>
-        {/* Sticker grid skeleton */}
         <div className='space-y-8'>
           {Array.from({ length: 3 }).map((_, s) => (
             <div key={s}>
@@ -250,7 +248,7 @@ export default function AlbumPage() {
           }}
         >
           <ArrowLeft className='h-4 w-4' />
-          Back to albums
+          {t.album.backToAlbums}
         </button>
 
         {/* Album header */}
@@ -267,7 +265,7 @@ export default function AlbumPage() {
               <div className='flex items-center justify-center gap-2.5 bg-linear-to-r from-yellow-500 to-amber-500 px-6 py-2.5'>
                 <Trophy className='h-4 w-4 text-white' />
                 <span className='text-sm font-bold uppercase tracking-widest text-white'>
-                  Album Complete!
+                  {t.album.albumComplete}
                 </span>
                 <Trophy className='h-4 w-4 text-white' />
               </div>
@@ -284,7 +282,7 @@ export default function AlbumPage() {
               <div className='flex flex-col gap-4 pb-1'>
                 <div>
                   <p className='text-xs font-semibold uppercase tracking-widest text-white/60'>
-                    Album
+                    {t.album.albumLabel}
                   </p>
                   <h1 className='text-3xl font-bold tracking-tight text-white'>
                     {album.name}
@@ -292,10 +290,10 @@ export default function AlbumPage() {
                 </div>
                 <div className='flex flex-wrap gap-2'>
                   {[
-                    { label: "Total", value: stats.total },
-                    { label: "Gotten", value: stats.collected },
-                    { label: "Missing", value: stats.missing },
-                    { label: "Repeated", value: stats.repeated },
+                    { label: t.album.total, value: stats.total },
+                    { label: t.album.gotten, value: stats.collected },
+                    { label: t.album.missing, value: stats.missing },
+                    { label: t.album.repeated, value: stats.repeated },
                   ].map(({ label, value }) => (
                     <div
                       key={label}
@@ -329,7 +327,7 @@ export default function AlbumPage() {
                   }
             }
           >
-            ALL
+            {t.album.all}
           </button>
           {Object.keys(sections).map((section) => (
             <button
@@ -362,7 +360,7 @@ export default function AlbumPage() {
             style={{ backgroundColor: colors.primary }}
           >
             <List className='h-3.5 w-3.5' />
-            Details
+            {t.album.details}
           </button>
         </div>
 
@@ -403,7 +401,7 @@ export default function AlbumPage() {
                           style={{ backgroundColor: colors.primary }}
                         >
                           <CheckCircle2 className='h-3 w-3' />
-                          Complete
+                          {t.album.complete}
                         </span>
                       ) : (
                         <span
@@ -453,7 +451,7 @@ export default function AlbumPage() {
             className='flex items-center gap-2 cursor-pointer rounded-full px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 disabled:opacity-50'
           >
             <RotateCcw className='h-3.5 w-3.5' />
-            Discard
+            {t.album.discard}
           </button>
           <button
             onClick={handleSave}
@@ -462,7 +460,7 @@ export default function AlbumPage() {
             style={{ backgroundColor: colors.primary }}
           >
             <Save className='h-3.5 w-3.5' />
-            {isSaving ? "Saving…" : `Save (${dirty.size})`}
+            {isSaving ? t.album.saving : `${t.album.save} (${dirty.size})`}
           </button>
         </div>
       </div>

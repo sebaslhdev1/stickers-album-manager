@@ -1,6 +1,7 @@
 "use client"
 
 import { Skeleton } from "@/components/ui/skeleton"
+import { useT } from "@/i18n/use-t"
 import { getErrorMessage } from "@/lib/errors"
 import { getMissingStickers, getRepeatedStickers } from "@/services/stickers"
 import type { AlbumColors } from "@/types"
@@ -27,6 +28,7 @@ export function StickersDetailPanel({
   refreshKey,
   onClose,
 }: Props) {
+  const t = useT()
   const [result, setResult] = useState<PanelResult | null>(null)
 
   const fetchKey = `${albumId}-${refreshKey}`
@@ -44,7 +46,6 @@ export function StickersDetailPanel({
       )
   }, [isOpen, albumId, refreshKey])
 
-  // Close on Escape
   useEffect(() => {
     if (!isOpen) return
     const handler = (e: KeyboardEvent) => {
@@ -76,7 +77,7 @@ export function StickersDetailPanel({
           className='flex shrink-0 items-center justify-between px-5 py-4'
           style={{ backgroundColor: colors.primary }}
         >
-          <h2 className='text-sm font-bold text-white'>Sticker Details</h2>
+          <h2 className='text-sm font-bold text-white'>{t.stickers.stickerDetails}</h2>
           <button
             onClick={onClose}
             className='text-white/70 transition-colors hover:text-white'
@@ -105,18 +106,18 @@ export function StickersDetailPanel({
           ) : result?.status === "success" ? (
             <div className='space-y-8'>
               <StickerSection
-                title='Missing'
+                title={t.stickers.missing}
                 count={result.missing.length}
                 items={result.missing}
                 chipColor={colors.accent}
-                emptyText='No missing stickers!'
+                emptyText={t.stickers.noMissing}
               />
               <StickerSection
-                title='Repeated'
+                title={t.stickers.repeated}
                 count={result.repeated.length}
                 items={result.repeated}
                 chipColor={colors.primary}
-                emptyText='No repeated stickers.'
+                emptyText={t.stickers.noRepeated}
               />
             </div>
           ) : null}

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/input-otp"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useT } from "@/i18n/use-t"
 import { signIn, signUp, verifyOtp } from "@/services/auth"
 import { ArrowLeft, CheckCircle2, Trophy } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -25,6 +26,7 @@ type View = "auth" | "verify" | "signup-success"
 
 export default function LoginPage() {
   const router = useRouter()
+  const t = useT()
   const [view, setView] = useState<View>("auth")
   const [pendingEmail, setPendingEmail] = useState("")
   const [otp, setOtp] = useState("")
@@ -41,7 +43,7 @@ export default function LoginPage() {
       setPendingEmail(email)
       setView("verify")
     } catch {
-      setError("Could not send the code. Please try again.")
+      setError(t.auth.signInError)
     } finally {
       setIsLoading(false)
     }
@@ -58,7 +60,7 @@ export default function LoginPage() {
       await signUp(name, email)
       setView("signup-success")
     } catch {
-      setError("Could not create your account. Please try again.")
+      setError(t.auth.signUpError)
     } finally {
       setIsLoading(false)
     }
@@ -71,7 +73,7 @@ export default function LoginPage() {
       await verifyOtp(pendingEmail, otp)
       router.push("/")
     } catch {
-      setError("Invalid code. Please try again.")
+      setError(t.auth.verifyError)
     } finally {
       setIsLoading(false)
     }
@@ -94,10 +96,10 @@ export default function LoginPage() {
           <Trophy className='h-8 w-8 text-white' />
         </div>
         <h1 className='text-2xl font-bold tracking-tight text-white'>
-          Sticker Album
+          {t.navbar.appTitle}
         </h1>
         <p className='mt-1 text-sm' style={{ color: 'var(--brand-muted)' }}>
-          Manage your world cup collection
+          {t.auth.subtitle}
         </p>
       </div>
 
@@ -107,9 +109,9 @@ export default function LoginPage() {
             <div className='mb-2 flex h-14 w-14 items-center justify-center rounded-full' style={{ backgroundColor: 'color-mix(in srgb, var(--brand-green) 15%, transparent)' }}>
               <CheckCircle2 className='h-7 w-7' style={{ color: 'var(--brand-green)' }} />
             </div>
-            <CardTitle className='text-lg'>Account created!</CardTitle>
+            <CardTitle className='text-lg'>{t.auth.accountCreated}</CardTitle>
             <CardDescription>
-              Your account is ready. Sign in to start managing your collection.
+              {t.auth.accountReadyDesc}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -118,7 +120,7 @@ export default function LoginPage() {
               style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
               onClick={() => { setView("auth"); setError("") }}
             >
-              Go to Sign In
+              {t.auth.goToSignIn}
             </Button>
           </CardContent>
         </Card>
@@ -128,10 +130,10 @@ export default function LoginPage() {
             <Tabs defaultValue='signin' className='w-full'>
               <TabsList className='mb-6 w-full'>
                 <TabsTrigger value='signin' className='flex-1 py-4'>
-                  Sign In
+                  {t.auth.signIn}
                 </TabsTrigger>
                 <TabsTrigger value='signup' className='flex-1 py-4'>
-                  Sign Up
+                  {t.auth.signUp}
                 </TabsTrigger>
               </TabsList>
 
@@ -139,12 +141,12 @@ export default function LoginPage() {
               <TabsContent value='signin' className='space-y-4'>
                 <form onSubmit={handleSignIn} className='space-y-4'>
                   <div className='space-y-2'>
-                    <Label htmlFor='signin-email'>Email</Label>
+                    <Label htmlFor='signin-email'>{t.auth.email}</Label>
                     <Input
                       id='signin-email'
                       name='email'
                       type='email'
-                      placeholder='you@example.com'
+                      placeholder={t.auth.emailPlaceholder}
                       required
                       autoComplete='email'
                       autoFocus
@@ -157,11 +159,11 @@ export default function LoginPage() {
                     style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
                     disabled={isLoading}
                   >
-                    {isLoading ? "Sending code…" : "Send code"}
+                    {isLoading ? t.auth.sendingCode : t.auth.sendCode}
                   </Button>
                 </form>
                 <p className='text-center text-xs text-muted-foreground'>
-                  We&apos;ll send a one-time code to your email.
+                  {t.auth.otpHint}
                 </p>
               </TabsContent>
 
@@ -169,24 +171,24 @@ export default function LoginPage() {
               <TabsContent value='signup' className='space-y-4'>
                 <form onSubmit={handleSignUp} className='space-y-4'>
                   <div className='space-y-1.5'>
-                    <Label htmlFor='name'>Name</Label>
+                    <Label htmlFor='name'>{t.auth.name}</Label>
                     <Input
                       id='name'
                       name='name'
                       type='text'
-                      placeholder='Your name'
+                      placeholder={t.auth.namePlaceholder}
                       required
                       autoComplete='name'
                       autoFocus
                     />
                   </div>
                   <div className='space-y-1.5'>
-                    <Label htmlFor='signup-email'>Email</Label>
+                    <Label htmlFor='signup-email'>{t.auth.email}</Label>
                     <Input
                       id='signup-email'
                       name='email'
                       type='email'
-                      placeholder='you@example.com'
+                      placeholder={t.auth.emailPlaceholder}
                       required
                       autoComplete='email'
                     />
@@ -198,7 +200,7 @@ export default function LoginPage() {
                     style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
                     disabled={isLoading}
                   >
-                    {isLoading ? "Creating account…" : "Create account"}
+                    {isLoading ? t.auth.creatingAccount : t.auth.createAccount}
                   </Button>
                 </form>
               </TabsContent>
@@ -214,11 +216,11 @@ export default function LoginPage() {
               className='mb-2 -ml-1 flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground'
             >
               <ArrowLeft className='h-4 w-4' />
-              Back
+              {t.auth.back}
             </button>
-            <CardTitle className='text-lg'>Check your email</CardTitle>
+            <CardTitle className='text-lg'>{t.auth.checkEmail}</CardTitle>
             <CardDescription>
-              We sent a 6-digit code to{" "}
+              {t.auth.codeSentTo}{" "}
               <span className='font-medium text-foreground'>
                 {pendingEmail}
               </span>
@@ -249,18 +251,18 @@ export default function LoginPage() {
                 style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
                 disabled={otp.length < 6 || isLoading}
               >
-                {isLoading ? "Verifying…" : "Verify"}
+                {isLoading ? t.auth.verifying : t.auth.verify}
               </Button>
             </form>
 
             <p className='text-center text-xs text-muted-foreground'>
-              Didn&apos;t receive the code?{" "}
+              {t.auth.didntReceive}{" "}
               <button
                 type='button'
                 onClick={handleBack}
                 className='underline underline-offset-2 transition-colors hover:text-foreground'
               >
-                Resend
+                {t.auth.resend}
               </button>
             </p>
           </CardContent>

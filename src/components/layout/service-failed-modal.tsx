@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@/i18n/use-t"
 import { removeToken } from "@/lib/token"
 import { LogIn, ServerCrash } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -8,6 +9,7 @@ import { useEffect, useState } from "react"
 export function ServiceFailedModal() {
   const [open, setOpen] = useState(false)
   const router = useRouter()
+  const t = useT()
 
   useEffect(() => {
     const handler = () => setOpen(true)
@@ -33,11 +35,10 @@ export function ServiceFailedModal() {
           </div>
           <div className='space-y-1.5'>
             <h2 className='text-lg font-bold tracking-tight'>
-              Server unavailable
+              {t.errors.serviceFailedTitle}
             </h2>
             <p className='text-sm text-muted-foreground'>
-              We couldn&apos;t reach the server after several attempts. Sign out
-              and try again later.
+              {t.errors.serviceFailedDesc}
             </p>
           </div>
           <button
@@ -46,7 +47,7 @@ export function ServiceFailedModal() {
             style={{ backgroundColor: 'var(--brand-dark)' }}
           >
             <LogIn className='h-4 w-4' />
-            Sign out and go to Login
+            {t.errors.serviceFailedButton}
           </button>
         </div>
       </div>

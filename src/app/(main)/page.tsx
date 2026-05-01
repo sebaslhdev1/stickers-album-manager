@@ -2,6 +2,7 @@
 
 import { AlbumCard } from "@/components/albums/album-card"
 import { AlbumStatsPanel } from "@/components/albums/album-stats-panel"
+import { useT } from "@/i18n/use-t"
 import { getAlbumStats, getAlbums } from "@/services/albums"
 import type { Album, AlbumColors, AlbumStats } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -58,9 +59,10 @@ function getMockColors(album: Album): AlbumColors {
 }
 
 export default function HomePage() {
+  const t = useT()
   const [albums, setAlbums] = useState<Album[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState("")
+  const [hasError, setHasError] = useState(false)
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null)
   const [albumStats, setAlbumStats] = useState<Record<string, AlbumStats | null>>({})
   const fetchedIds = useRef(new Set<string>())
@@ -71,7 +73,7 @@ export default function HomePage() {
         setAlbums(data)
         setSelectedAlbum(data[0] ?? null)
       })
-      .catch(() => setError("Could not load albums. Please try again."))
+      .catch(() => setHasError(true))
       .finally(() => setIsLoading(false))
   }, [])
 
@@ -100,23 +102,23 @@ export default function HomePage() {
       {/* Page header */}
       <div className='mb-10'>
         <p className='mb-2 text-xs font-semibold uppercase tracking-widest' style={{ color: 'var(--brand-orange)' }}>
-          My Collection
+          {t.home.myCollection}
         </p>
         <div className='flex items-end justify-between'>
-          <h1 className='text-5xl font-bold tracking-tight' style={{ color: 'var(--brand-dark)' }}>Albums</h1>
+          <h1 className='text-5xl font-bold tracking-tight' style={{ color: 'var(--brand-dark)' }}>{t.home.title}</h1>
           {!isLoading && albums.length > 0 && (
             <div className='text-right'>
               <span className='text-4xl font-bold' style={{ color: 'var(--brand-orange)' }}>
                 {albums.length}
               </span>
               <p className='mt-0.5 text-xs' style={{ color: 'var(--brand-muted)' }}>
-                {albums.length === 1 ? "album" : "albums"} available
+                {albums.length === 1 ? t.home.albumSingular : t.home.albumsPlural}
               </p>
             </div>
           )}
         </div>
         <p className='mt-3' style={{ color: 'var(--brand-muted)' }}>
-          Select an album to explore your sticker collection.
+          {t.home.subtitle}
         </p>
         <div className='mt-6 h-px' style={{ background: 'linear-gradient(to right, color-mix(in srgb, var(--brand-orange) 40%, transparent), color-mix(in srgb, var(--brand-orange) 10%, transparent), transparent)' }} />
       </div>
@@ -128,18 +130,18 @@ export default function HomePage() {
             <Skeleton key={i} className="aspect-3/4 w-full rounded-2xl" />
           ))}
         </div>
-      ) : error ? (
+      ) : hasError ? (
         <div className='py-32 text-center'>
-          <p className='text-sm text-destructive'>{error}</p>
+          <p className='text-sm text-destructive'>{t.home.loadError}</p>
         </div>
       ) : albums.length === 0 ? (
         <div className='py-32 text-center'>
           <BookOpen className='mx-auto mb-4 h-12 w-12 text-muted-foreground/40' />
           <p className='font-medium text-muted-foreground'>
-            No albums available
+            {t.home.noAlbums}
           </p>
           <p className='mt-1 text-sm text-muted-foreground/60'>
-            Check back later.
+            {t.home.noAlbumsHint}
           </p>
         </div>
       ) : (

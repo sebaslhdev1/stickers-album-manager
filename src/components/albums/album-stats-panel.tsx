@@ -1,4 +1,7 @@
+"use client"
+
 import { Skeleton } from "@/components/ui/skeleton"
+import { useT } from "@/i18n/use-t"
 import type { Album, AlbumColors, AlbumStats } from "@/types"
 import {
   CheckCircle2,
@@ -18,15 +21,16 @@ export function AlbumStatsPanel({
   colors: AlbumColors
   stats: AlbumStats | null | undefined
 }) {
+  const t = useT()
   const isLoading = stats === undefined
   const hasError = stats === null
 
   const statTiles = stats
     ? [
-        { label: "Total stickers", value: stats.total, color: colors.primary, Icon: Layers },
-        { label: "Collected", value: stats.collected, color: colors.primary, Icon: CheckCircle2 },
-        { label: "Missing", value: stats.missing, color: colors.accent, Icon: CircleDashed },
-        { label: "Repeated", value: stats.repeated, color: colors.accent, Icon: Copy },
+        { label: t.album.totalStickers, value: stats.total, color: colors.primary, Icon: Layers },
+        { label: t.album.collected, value: stats.collected, color: colors.primary, Icon: CheckCircle2 },
+        { label: t.album.missing, value: stats.missing, color: colors.accent, Icon: CircleDashed },
+        { label: t.album.repeated, value: stats.repeated, color: colors.accent, Icon: Copy },
       ]
     : []
 
@@ -50,7 +54,7 @@ export function AlbumStatsPanel({
             className='rounded-lg px-3 py-1.5 text-xs font-semibold text-white'
             style={{ backgroundColor: colors.accent }}
           >
-            Open Album
+            {t.album.openAlbum}
           </Link>
         </div>
 
@@ -72,7 +76,7 @@ export function AlbumStatsPanel({
         ) : hasError ? (
           <div className='flex items-center justify-center py-14'>
             <p className='text-sm font-bold' style={{ color: colors.primary }}>
-              Could not load stats.
+              {t.album.statsLoadError}
             </p>
           </div>
         ) : stats ? (
@@ -98,7 +102,7 @@ export function AlbumStatsPanel({
             <div className='space-y-1.5'>
               <div className='flex items-center justify-between text-sm'>
                 <span className='font-medium' style={{ color: colors.primary }}>
-                  Progress
+                  {t.album.progress}
                 </span>
                 <span className='font-semibold' style={{ color: colors.accent }}>
                   {stats.progress}%

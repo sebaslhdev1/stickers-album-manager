@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@/i18n/use-t"
 import { Check, ChevronDown, Copy } from "lucide-react"
 import { useState } from "react"
 
@@ -18,6 +19,7 @@ export function StickerSection({
   chipColor,
   emptyText,
 }: Props) {
+  const t = useT()
   const [open, setOpen] = useState(true)
   const [copied, setCopied] = useState(false)
 
@@ -56,7 +58,7 @@ export function StickerSection({
               ) : (
                 <Copy className='h-3 w-3' />
               )}
-              {copied ? "Copied!" : "Copy"}
+              {copied ? t.stickers.copied : t.stickers.copy}
             </span>
           )}
           <ChevronDown

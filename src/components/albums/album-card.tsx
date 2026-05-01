@@ -1,3 +1,6 @@
+"use client"
+
+import { useT } from "@/i18n/use-t"
 import { cn } from "@/lib/utils"
 import type { Album } from "@/types"
 import { Check, Trophy } from "lucide-react"
@@ -14,6 +17,8 @@ export function AlbumCard({
   isComplete?: boolean
   onSelect: () => void
 }) {
+  const t = useT()
+
   return (
     <div
       onClick={onSelect}
@@ -62,7 +67,7 @@ export function AlbumCard({
           <div className='absolute left-3 top-3 flex items-center gap-1 rounded-full bg-yellow-400 px-2 py-1 shadow-lg'>
             <Trophy className='h-3 w-3 text-yellow-900' />
             <span className='text-[10px] font-bold uppercase tracking-wide text-yellow-900'>
-              Complete
+              {t.album.complete}
             </span>
           </div>
         )}
