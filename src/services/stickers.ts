@@ -20,18 +20,24 @@ export async function getStickers(albumId: string): Promise<Sticker[]> {
   }))
 }
 
+function parseStickers(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.map(String).filter(Boolean)
+  if (typeof raw !== "string" || !raw.trim()) return []
+  return raw.split(",").map((s) => s.trim()).filter(Boolean)
+}
+
 export async function getMissingStickers(albumId: string): Promise<string[]> {
-  const res = await api.get<{ missing: string }>("/get_missing_stickers", {
+  const res = await api.get<{ missing: unknown }>("/get_missing_stickers", {
     params: { album_id: albumId },
   })
-  return res.data.missing.split(", ").filter(Boolean)
+  return parseStickers(res.data.missing)
 }
 
 export async function getRepeatedStickers(albumId: string): Promise<string[]> {
-  const res = await api.get<{ repeated: string }>("/get_repeated_stickers", {
+  const res = await api.get<{ repeated: unknown }>("/get_repeated_stickers", {
     params: { album_id: albumId },
   })
-  return res.data.repeated.split(", ").filter(Boolean)
+  return parseStickers(res.data.repeated)
 }
 
 export async function saveStickers(

@@ -109,8 +109,8 @@ export default function AlbumPage() {
 
   function handleRemove(stickerId: string) {
     const sticker = stickers.find((s) => s.id === stickerId)!
-    if (sticker.amount === 0) return
-    const newAmount = sticker.amount - 1
+    if (sticker.amount <= 0) return
+    const newAmount = Math.max(0, sticker.amount - 1)
     setStickers((prev) =>
       prev.map((s) => (s.id === stickerId ? { ...s, amount: newAmount } : s)),
     )
@@ -132,14 +132,16 @@ export default function AlbumPage() {
     const wasComplete =
       stickers.length > 0 &&
       stickers.every((s) => (originalAmounts.current.get(s.id) ?? 0) > 0)
-    const willBeComplete =
-      stickers.length > 0 && stickers.every((s) => s.amount > 0)
     setIsSaving(true)
     setSaveError(null)
     try {
       const modified = stickers.filter((s) => dirty.has(s.id))
       await saveStickers(id, modified)
       modified.forEach((s) => originalAmounts.current.set(s.id, s.amount))
+      // Compute completion from server-confirmed state, not optimistic UI state
+      const willBeComplete =
+        stickers.length > 0 &&
+        stickers.every((s) => (originalAmounts.current.get(s.id) ?? 0) > 0)
       setSavedCompleted((prev) => {
         const next = new Set(prev)
         modified.forEach((s) => {
