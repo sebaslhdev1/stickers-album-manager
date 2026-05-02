@@ -46,6 +46,9 @@ export interface Translation {
     missing: string
     repeated: string
     all: string
+    filters: string
+    searchPlaceholder: string
+    searchNoMatch: string
     details: string
     complete: string
     albumComplete: string

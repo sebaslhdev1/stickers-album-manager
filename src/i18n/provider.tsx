@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState } from "react"
+import { createContext, useCallback, useContext, useSyncExternalStore } from "react"
 import type { Locale } from "./types"
 
 type LocaleContextValue = {
@@ -13,22 +13,37 @@ const LocaleContext = createContext<LocaleContextValue>({
   setLocale: () => {},
 })
 
-function detectLocale(): Locale {
-  const saved = localStorage.getItem("locale")
-  if (saved === "en" || saved === "es") return saved
-  return navigator.language.startsWith("es") ? "es" : "en"
+// Module-level store so all consumers share the same value
+let _current: Locale | null = null
+const _listeners = new Set<() => void>()
+
+function getSnapshot(): Locale {
+  if (_current === null) {
+    const saved = localStorage.getItem("locale")
+    _current =
+      saved === "en" || saved === "es"
+        ? saved
+        : navigator.language.startsWith("es")
+          ? "es"
+          : "en"
+  }
+  return _current
+}
+
+function subscribe(cb: () => void) {
+  _listeners.add(cb)
+  return () => _listeners.delete(cb)
 }
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window === "undefined") return "en"
-    return detectLocale()
-  })
+  // getServerSnapshot always returns "en" — prevents SSR/client hydration mismatch
+  const locale = useSyncExternalStore(subscribe, getSnapshot, () => "en" as Locale)
 
-  function setLocale(l: Locale) {
+  const setLocale = useCallback((l: Locale) => {
+    _current = l
     localStorage.setItem("locale", l)
-    setLocaleState(l)
-  }
+    _listeners.forEach((cb) => cb())
+  }, [])
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>
