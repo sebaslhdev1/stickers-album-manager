@@ -1,5 +1,5 @@
 import { api } from "@/lib/api"
-import { removeToken, setToken } from "@/lib/token"
+import { getToken, removeRefreshToken, removeToken, setRefreshToken, setToken } from "@/lib/token"
 
 export async function signUp(name: string, email: string): Promise<void> {
   await api.post("/signup_user", { name, email })
@@ -9,17 +9,22 @@ export async function signIn(email: string): Promise<void> {
   await api.post("/sign_in_user", { email })
 }
 
-export function logout(): void {
-  removeToken();
-  // TODO: call server-side logout endpoint if needed
+export async function logout(): Promise<void> {
+  try {
+    await api.post("/logout", { refresh_token: getToken() })
+  } catch {
+    // server-side logout failed — tokens are still cleared locally below
+  } finally {
+    removeToken()
+    removeRefreshToken()
+  }
 }
 
 export async function verifyOtp(email: string, token: string): Promise<void> {
-  // TODO: adjust the response field name if the API returns something other than { token }
-  const res = await api.post<{ access_token: string }>("/verify", {
+  const res = await api.post<{ access_token: string; refresh_token: string }>("/verify", {
     email,
     token,
   })
-  console.log({ res })
   setToken(res.data.access_token)
+  setRefreshToken(res.data.refresh_token)
 }

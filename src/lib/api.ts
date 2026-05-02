@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getToken, removeToken } from "@/lib/token";
+import { getRefreshToken, getToken, removeRefreshToken, removeToken, setRefreshToken, setToken } from "@/lib/token";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -15,14 +15,58 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Ensures concurrent 401s only trigger one refresh attempt
+let refreshPromise: Promise<void> | null = null;
+
+function expireSession() {
+  removeToken();
+  removeRefreshToken();
+  window.dispatchEvent(new CustomEvent("service:ready"));
+  window.dispatchEvent(new CustomEvent("auth:expired"));
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      removeToken();
-      window.dispatchEvent(new CustomEvent("service:ready"));
-      window.dispatchEvent(new CustomEvent("auth:expired"));
-      return Promise.reject(error);
+      const config = error.config;
+
+      // Don't retry the refresh call itself — avoids infinite loops
+      if (config._isRefresh) {
+        expireSession();
+        return Promise.reject(error);
+      }
+
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) {
+        expireSession();
+        return Promise.reject(error);
+      }
+
+      // Deduplicate concurrent refresh calls
+      refreshPromise ??= api
+        .post<{ access_token: string; refresh_token: string }>(
+          "/refresh",
+          { refresh_token: refreshToken },
+          { _isRefresh: true } as object,
+        )
+        .then((res) => {
+          setToken(res.data.access_token);
+          setRefreshToken(res.data.refresh_token);
+        })
+        .catch(() => {
+          expireSession();
+          throw error;
+        })
+        .finally(() => {
+          refreshPromise = null;
+        });
+
+      await refreshPromise;
+
+      // Retry the original request with the new token
+      config.headers.Authorization = `Bearer ${getToken()}`;
+      return api(config);
     }
 
     const config = error.config;

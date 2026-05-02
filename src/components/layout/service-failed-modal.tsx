@@ -1,7 +1,7 @@
 "use client"
 
 import { useT } from "@/i18n/use-t"
-import { removeToken } from "@/lib/token"
+import { removeRefreshToken, removeToken } from "@/lib/token"
 import { LogIn, ServerCrash } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -21,6 +21,7 @@ export function ServiceFailedModal() {
 
   function handleSignOut() {
     removeToken()
+    removeRefreshToken()
     setOpen(false)
     router.push("/login")
   }

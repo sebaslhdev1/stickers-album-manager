@@ -23,8 +23,8 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     router.push(ROUTES.LOGIN);
   }
 
