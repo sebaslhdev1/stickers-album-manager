@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getRefreshToken, getToken, removeRefreshToken, removeToken, setRefreshToken, setToken } from "@/lib/token";
+import { getRefreshToken, getToken, removeRefreshToken, removeToken, removeUserName, setRefreshToken, setToken } from "@/lib/token";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -21,6 +21,7 @@ let refreshPromise: Promise<void> | null = null;
 function expireSession() {
   removeToken();
   removeRefreshToken();
+  removeUserName();
   window.dispatchEvent(new CustomEvent("service:ready"));
   window.dispatchEvent(new CustomEvent("auth:expired"));
 }

@@ -18,6 +18,21 @@ export function removeToken(): void {
   document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; SameSite=Lax`;
 }
 
+const USER_NAME_KEY = "user_name"
+
+export function getUserName(): string | null {
+  if (typeof window === "undefined") return null
+  return localStorage.getItem(USER_NAME_KEY)
+}
+
+export function setUserName(name: string): void {
+  localStorage.setItem(USER_NAME_KEY, name)
+}
+
+export function removeUserName(): void {
+  localStorage.removeItem(USER_NAME_KEY)
+}
+
 export function getRefreshToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(REFRESH_TOKEN_KEY);

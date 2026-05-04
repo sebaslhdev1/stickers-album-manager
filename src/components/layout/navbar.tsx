@@ -10,6 +10,7 @@ import { useLocale } from "@/i18n/provider";
 import { useT } from "@/i18n/use-t";
 import type { Locale } from "@/i18n/types";
 import { logout } from "@/services/auth";
+import { getUserName } from "@/lib/token";
 import { ROUTES } from "@/constants";
 
 const LOCALE_LABELS: Record<Locale, string> = {
@@ -23,6 +24,7 @@ export function Navbar() {
   const { locale, setLocale } = useLocale();
   const [open, setOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [userName] = useState(() => getUserName());
 
   async function handleLogout() {
     await logout();
@@ -54,6 +56,12 @@ export function Navbar() {
 
         {/* Right side controls */}
         <div className="flex items-center gap-1 -mr-2">
+          {/* Greeting */}
+          {userName && (
+            <span className="hidden sm:block text-sm text-white/70 pr-1">
+              Hi, <span className="font-semibold text-white">{userName}</span>
+            </span>
+          )}
           {/* Language switcher */}
           <div className="relative">
             <Button

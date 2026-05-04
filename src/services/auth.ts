@@ -1,5 +1,5 @@
 import { api } from "@/lib/api"
-import { getToken, removeRefreshToken, removeToken, setRefreshToken, setToken } from "@/lib/token"
+import { getToken, removeRefreshToken, removeToken, removeUserName, setRefreshToken, setToken, setUserName } from "@/lib/token"
 
 export async function signUp(name: string, email: string): Promise<void> {
   await api.post("/signup_user", { name, email })
@@ -17,14 +17,16 @@ export async function logout(): Promise<void> {
   } finally {
     removeToken()
     removeRefreshToken()
+    removeUserName()
   }
 }
 
 export async function verifyOtp(email: string, token: string): Promise<void> {
-  const res = await api.post<{ access_token: string; refresh_token: string }>("/verify", {
+  const res = await api.post<{ access_token: string; refresh_token: string; name: string }>("/verify", {
     email,
     token,
   })
   setToken(res.data.access_token)
   setRefreshToken(res.data.refresh_token)
+  setUserName(res.data.name)
 }
