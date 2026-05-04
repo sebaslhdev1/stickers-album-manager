@@ -47,6 +47,8 @@ export interface Translation {
     repeated: string
     all: string
     filters: string
+    collapseAll: string
+    expandAll: string
     searchPlaceholder: string
     searchNoMatch: string
     details: string

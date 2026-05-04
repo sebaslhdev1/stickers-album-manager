@@ -407,14 +407,34 @@ export default function AlbumPage() {
                 }}
               />
             </button>
-            <button
-              onClick={() => setIsPanelOpen(true)}
-              className='flex items-center gap-1.5 cursor-pointer rounded-full px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-80'
-              style={{ backgroundColor: colors.primary }}
-            >
-              <List className='h-3.5 w-3.5' />
-              {t.album.details}
-            </button>
+            <div className='flex items-center gap-2'>
+              <button
+                onClick={() => {
+                  const allCollapsed = Object.keys(sections).every((s) =>
+                    collapsedSections.has(s),
+                  )
+                  setCollapsedSections(
+                    allCollapsed
+                      ? new Set()
+                      : new Set(Object.keys(sections)),
+                  )
+                }}
+                className='cursor-pointer text-xs font-semibold transition-opacity hover:opacity-70'
+                style={{ color: colors.primary }}
+              >
+                {Object.keys(sections).every((s) => collapsedSections.has(s))
+                  ? t.album.expandAll
+                  : t.album.collapseAll}
+              </button>
+              <button
+                onClick={() => setIsPanelOpen(true)}
+                className='flex items-center gap-1.5 cursor-pointer rounded-full px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-80'
+                style={{ backgroundColor: colors.primary }}
+              >
+                <List className='h-3.5 w-3.5' />
+                {t.album.details}
+              </button>
+            </div>
           </div>
 
           {/* Filter pills — collapsible */}
@@ -488,9 +508,7 @@ export default function AlbumPage() {
                   .filter(([section]) => activeSections.size === 0 || activeSections.has(section))
             .map(([section, sectionStickers], index) => {
               const total = sectionStickers.length
-              const collected = sectionStickers.filter((s) =>
-                savedCompleted.has(s.id),
-              ).length
+              const collected = sectionStickers.filter((s) => s.amount > 0).length
               const done = collected === total
               const isCollapsed = collapsedSections.has(section)
               return (
