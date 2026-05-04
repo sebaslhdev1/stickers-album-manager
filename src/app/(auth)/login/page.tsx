@@ -18,7 +18,8 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useT } from "@/i18n/use-t"
 import { signIn, signUp, verifyOtp } from "@/services/auth"
-import { ArrowLeft, CheckCircle2, Trophy } from "lucide-react"
+import { ArrowLeft, CheckCircle2 } from "lucide-react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -89,12 +90,13 @@ export default function LoginPage() {
     <div className='mx-auto w-full max-w-sm'>
       {/* Branding */}
       <div className='mb-8 text-center'>
-        <div
-          className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg'
-          style={{ background: 'linear-gradient(135deg, var(--brand-orange) 0%, #c96a22 100%)', boxShadow: '0 8px 24px color-mix(in srgb, var(--brand-orange) 35%, transparent)' }}
-        >
-          <Trophy className='h-8 w-8 text-white' />
-        </div>
+        <Image
+          src={process.env.NEXT_PUBLIC_LOGO_URL!}
+          alt="KardKeeper logo"
+          width={64}
+          height={64}
+          className="mx-auto mb-4 rounded-2xl shadow-lg"
+        />
         <h1 className='text-2xl font-bold tracking-tight text-white'>
           {t.navbar.appTitle}
         </h1>
