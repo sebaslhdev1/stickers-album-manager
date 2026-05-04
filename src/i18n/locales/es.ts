@@ -24,7 +24,7 @@ export const es: Translation = {
     accountReadyDesc:
       "Tu cuenta está lista. Inicia sesión para gestionar tu colección.",
     goToSignIn: "Ir a Iniciar sesión",
-    subtitle: "Gestiona tu colección del mundial",
+    subtitle: "Gestiona tu colección de álbumes",
     signInError: "No se pudo enviar el código. Por favor intenta de nuevo.",
     signUpError: "No se pudo crear tu cuenta. Por favor intenta de nuevo.",
     verifyError: "Código inválido. Por favor intenta de nuevo.",

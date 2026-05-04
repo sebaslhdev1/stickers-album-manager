@@ -24,7 +24,7 @@ export const en: Translation = {
     accountReadyDesc:
       "Your account is ready. Sign in to start managing your collection.",
     goToSignIn: "Go to Sign In",
-    subtitle: "Manage your world cup collection",
+    subtitle: "Manage your album collection",
     signInError: "Could not send the code. Please try again.",
     signUpError: "Could not create your account. Please try again.",
     verifyError: "Invalid code. Please try again.",
