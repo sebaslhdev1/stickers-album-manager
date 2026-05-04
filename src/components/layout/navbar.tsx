@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, LogOut, Trophy, User } from "lucide-react";
+import { Globe, LogOut, User } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -36,15 +37,13 @@ export function Navbar() {
       <div className="flex h-16 w-full items-center justify-between px-6">
         {/* Logo */}
         <Link href={ROUTES.HOME} className="group flex items-center gap-3">
-          <div
-            className="flex h-8 w-8 items-center justify-center rounded-xl shadow-md transition-shadow group-hover:shadow-lg"
-            style={{
-              background: `linear-gradient(135deg, var(--brand-orange) 0%, #c96a22 100%)`,
-              boxShadow: `0 4px 12px color-mix(in srgb, var(--brand-orange) 40%, transparent)`,
-            }}
-          >
-            <Trophy className="h-4 w-4 text-white" />
-          </div>
+          <Image
+            src={process.env.NEXT_PUBLIC_LOGO_URL!}
+            alt="KardKeeper logo"
+            width={36}
+            height={36}
+            className="rounded-xl"
+          />
           <div className="flex flex-col leading-none">
             <span className="text-sm font-bold tracking-tight text-white">{t.navbar.appTitle}</span>
             <span className="text-[10px] tracking-wide" style={{ color: 'var(--brand-muted)' }}>
