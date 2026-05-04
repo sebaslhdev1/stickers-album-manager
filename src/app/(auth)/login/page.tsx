@@ -92,15 +92,15 @@ export default function LoginPage() {
       <div className='mb-8 text-center'>
         <Image
           src={process.env.NEXT_PUBLIC_LOGO_URL!}
-          alt="KardKeeper logo"
-          width={64}
-          height={64}
-          className="mx-auto mb-4 rounded-2xl shadow-lg"
+          alt='KardKeeper logo'
+          width={125}
+          height={125}
+          className='mx-auto mb-4 rounded-2xl shadow-lg'
         />
         <h1 className='text-2xl font-bold tracking-tight text-white'>
           {t.navbar.appTitle}
         </h1>
-        <p className='mt-1 text-sm' style={{ color: 'var(--brand-muted)' }}>
+        <p className='mt-1 text-sm' style={{ color: "var(--brand-muted)" }}>
           {t.auth.subtitle}
         </p>
       </div>
@@ -108,19 +108,29 @@ export default function LoginPage() {
       {view === "signup-success" ? (
         <Card className='border-0 bg-white/95 shadow-2xl shadow-black/40 backdrop-blur-sm'>
           <CardHeader className='items-center text-center'>
-            <div className='mb-2 flex h-14 w-14 items-center justify-center rounded-full' style={{ backgroundColor: 'color-mix(in srgb, var(--brand-green) 15%, transparent)' }}>
-              <CheckCircle2 className='h-7 w-7' style={{ color: 'var(--brand-green)' }} />
+            <div
+              className='mb-2 flex h-14 w-14 items-center justify-center rounded-full'
+              style={{
+                backgroundColor:
+                  "color-mix(in srgb, var(--brand-green) 15%, transparent)",
+              }}
+            >
+              <CheckCircle2
+                className='h-7 w-7'
+                style={{ color: "var(--brand-green)" }}
+              />
             </div>
             <CardTitle className='text-lg'>{t.auth.accountCreated}</CardTitle>
-            <CardDescription>
-              {t.auth.accountReadyDesc}
-            </CardDescription>
+            <CardDescription>{t.auth.accountReadyDesc}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button
               className='w-full py-5'
-              style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
-              onClick={() => { setView("auth"); setError("") }}
+              style={{ backgroundColor: "var(--brand-orange)", color: "#fff" }}
+              onClick={() => {
+                setView("auth")
+                setError("")
+              }}
             >
               {t.auth.goToSignIn}
             </Button>
@@ -158,7 +168,10 @@ export default function LoginPage() {
                   <Button
                     type='submit'
                     className='w-full py-5'
-                    style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
+                    style={{
+                      backgroundColor: "var(--brand-orange)",
+                      color: "#fff",
+                    }}
                     disabled={isLoading}
                   >
                     {isLoading ? t.auth.sendingCode : t.auth.sendCode}
@@ -199,7 +212,10 @@ export default function LoginPage() {
                   <Button
                     type='submit'
                     className='w-full py-5'
-                    style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
+                    style={{
+                      backgroundColor: "var(--brand-orange)",
+                      color: "#fff",
+                    }}
                     disabled={isLoading}
                   >
                     {isLoading ? t.auth.creatingAccount : t.auth.createAccount}
@@ -229,9 +245,21 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className='space-y-6'>
-            <form onSubmit={(e) => { e.preventDefault(); handleVerify() }} className='space-y-6'>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                handleVerify()
+              }}
+              className='space-y-6'
+            >
               <div className='flex justify-center'>
-                <InputOTP maxLength={6} value={otp} onChange={setOtp} onComplete={handleVerify} autoFocus>
+                <InputOTP
+                  maxLength={6}
+                  value={otp}
+                  onChange={setOtp}
+                  onComplete={handleVerify}
+                  autoFocus
+                >
                   <InputOTPGroup>
                     <InputOTPSlot index={0} className='h-12 w-10 text-base' />
                     <InputOTPSlot index={1} className='h-12 w-10 text-base' />
@@ -250,7 +278,10 @@ export default function LoginPage() {
               <Button
                 type='submit'
                 className='w-full'
-                style={{ backgroundColor: 'var(--brand-orange)', color: '#fff' }}
+                style={{
+                  backgroundColor: "var(--brand-orange)",
+                  color: "#fff",
+                }}
                 disabled={otp.length < 6 || isLoading}
               >
                 {isLoading ? t.auth.verifying : t.auth.verify}
