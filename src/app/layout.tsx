@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "KardKeeper",
   description: "Manage your albums collection",
+  icons: {
+    apple: "/icons/icon-192.png",
+  },
 }
 
 export default function RootLayout({
