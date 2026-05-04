@@ -1,30 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Globe, LogOut, User } from "lucide-react";
+import { useState, useSyncExternalStore } from "react";
+import { LogOut, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useLocale } from "@/i18n/provider";
 import { useT } from "@/i18n/use-t";
-import type { Locale } from "@/i18n/types";
 import { logout } from "@/services/auth";
 import { getUserName } from "@/lib/token";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ROUTES } from "@/constants";
-
-const LOCALE_LABELS: Record<Locale, string> = {
-  en: "EN",
-  es: "ES",
-}
 
 export function Navbar() {
   const router = useRouter();
   const t = useT();
-  const { locale, setLocale } = useLocale();
   const [open, setOpen] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
-  const [userName] = useState(() => getUserName());
+  const userName = useSyncExternalStore(() => () => {}, () => getUserName(), () => null);
 
   async function handleLogout() {
     await logout();
@@ -62,42 +54,8 @@ export function Navbar() {
               {t.navbar.greeting}, <span className="font-semibold text-white">{userName}</span>
             </span>
           )}
-          {/* Language switcher */}
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex items-center gap-1.5 rounded-full text-white hover:bg-white/10 px-2.5"
-              onClick={() => { setLangOpen((o) => !o); setOpen(false); }}
-            >
-              <Globe className="h-3.5 w-3.5" />
-              <span className="text-xs font-semibold">{LOCALE_LABELS[locale]}</span>
-            </Button>
 
-            {langOpen && (
-              <>
-                <div className="fixed inset-0" onClick={() => setLangOpen(false)} />
-                <div
-                  className="absolute right-0 top-full z-20 mt-2 w-32 overflow-hidden rounded-xl bg-white shadow-lg"
-                  style={{ border: '1px solid color-mix(in srgb, var(--brand-dark) 10%, transparent)' }}
-                >
-                  {(["en", "es"] as Locale[]).map((l) => (
-                    <button
-                      key={l}
-                      onClick={() => { setLocale(l); setLangOpen(false); }}
-                      className="flex w-full items-center justify-between px-4 py-2.5 text-sm transition-colors hover:bg-black/5"
-                      style={{ color: 'var(--brand-dark)', fontWeight: locale === l ? 700 : 400 }}
-                    >
-                      <span>{l === "en" ? "English" : "Español"}</span>
-                      {locale === l && (
-                        <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: 'var(--brand-orange)' }} />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+          <LanguageSwitcher />
 
           {/* User menu */}
           <div className="relative">
@@ -105,7 +63,7 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               className="rounded-full text-white hover:bg-white/10"
-              onClick={() => { setOpen((o) => !o); setLangOpen(false); }}
+              onClick={() => setOpen((o) => !o)}
             >
               <User className="h-5 w-5" />
             </Button>
@@ -117,6 +75,11 @@ export function Navbar() {
                   className="absolute right-0 top-full z-20 mt-2 w-44 overflow-hidden rounded-xl bg-white shadow-lg"
                   style={{ border: '1px solid color-mix(in srgb, var(--brand-dark) 10%, transparent)' }}
                 >
+                  {userName && (
+                    <div className="sm:hidden border-b px-4 py-2.5" style={{ borderColor: 'color-mix(in srgb, var(--brand-dark) 8%, transparent)' }}>
+                      <p className="text-sm font-semibold truncate" style={{ color: 'var(--brand-dark)' }}>{userName}</p>
+                    </div>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="flex w-full items-center gap-2.5 px-4 py-3 text-sm transition-colors hover:bg-black/5"

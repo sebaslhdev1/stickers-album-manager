@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useT } from "@/i18n/use-t"
 import { signIn, signUp, verifyOtp } from "@/services/auth"
+import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { ArrowLeft, CheckCircle2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -88,6 +89,9 @@ export default function LoginPage() {
 
   return (
     <div className='mx-auto w-full max-w-sm'>
+      <div className='absolute top-4 right-4'>
+        <LanguageSwitcher />
+      </div>
       {/* Branding */}
       <div className='mb-8 text-center'>
         <Image
