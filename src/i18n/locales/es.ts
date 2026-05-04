@@ -77,6 +77,7 @@ export const es: Translation = {
     appTitle: "KardKeeper",
     appSubtitle: "Gestor de Colección",
     logOut: "Cerrar sesión",
+    greeting: "Hola",
   },
   errors: {
     sessionExpiredTitle: "Sesión expirada",

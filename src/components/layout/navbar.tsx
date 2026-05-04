@@ -59,7 +59,7 @@ export function Navbar() {
           {/* Greeting */}
           {userName && (
             <span className="hidden sm:block text-sm text-white/70 pr-1">
-              Hi, <span className="font-semibold text-white">{userName}</span>
+              {t.navbar.greeting}, <span className="font-semibold text-white">{userName}</span>
             </span>
           )}
           {/* Language switcher */}
