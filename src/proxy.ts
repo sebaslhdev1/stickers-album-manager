@@ -9,10 +9,7 @@ export function proxy(request: NextRequest) {
 
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 
-  if (!token && !isPublic) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
+  // Redirect authenticated users away from the login page
   if (token && isPublic) {
     return NextResponse.redirect(new URL("/", request.url));
   }
@@ -21,5 +18,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|api|favicon.ico).*)"],
+  matcher: ["/((?!_next|api|favicon.ico|icon|apple-icon|manifest).*)"],
 };
