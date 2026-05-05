@@ -87,7 +87,7 @@ export function StickersDetailPanel({
         </div>
 
         {/* Content */}
-        <div className='flex-1 overflow-y-auto p-5'>
+        <div className='min-h-0 flex-1 overflow-y-auto p-5 pb-20 md:pb-5'>
           {isLoading ? (
             <div className='space-y-6'>
               {[1, 2].map((i) => (

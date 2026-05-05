@@ -20,7 +20,7 @@ export function StickerSection({
   emptyText,
 }: Props) {
   const t = useT()
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
   function handleCopy(e: React.MouseEvent) {
@@ -68,25 +68,29 @@ export function StickerSection({
         </div>
       </button>
 
-      {open && (
-        <div className='px-4 pb-4 pt-2'>
-          {items.length === 0 ? (
-            <p className='text-sm text-muted-foreground'>{emptyText}</p>
-          ) : (
-            <div className='flex flex-wrap gap-1.5'>
-              {items.map((name) => (
-                <span
-                  key={name}
-                  className='rounded-full px-2.5 py-1 text-xs font-semibold text-white'
-                  style={{ backgroundColor: chipColor }}
-                >
-                  {name.toUpperCase()}
-                </span>
-              ))}
-            </div>
-          )}
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+      >
+        <div className='min-h-0 overflow-hidden'>
+          <div className='px-4 pb-4 pt-2'>
+            {items.length === 0 ? (
+              <p className='text-sm text-muted-foreground'>{emptyText}</p>
+            ) : (
+              <div className='flex flex-wrap gap-1.5'>
+                {items.map((name) => (
+                  <span
+                    key={name}
+                    className='rounded-full px-2.5 py-1 text-xs font-semibold text-white'
+                    style={{ backgroundColor: chipColor }}
+                  >
+                    {name.toUpperCase()}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
