@@ -55,8 +55,12 @@ api.interceptors.response.use(
           setToken(res.data.access_token);
           setRefreshToken(res.data.refresh_token);
         })
-        .catch(() => {
-          expireSession();
+        .catch((refreshError) => {
+          // Only expire the session if the refresh token itself is rejected (401)
+          // Network errors or 503s should not log the user out
+          if (refreshError.response?.status === 401) {
+            expireSession();
+          }
           throw error;
         })
         .finally(() => {
