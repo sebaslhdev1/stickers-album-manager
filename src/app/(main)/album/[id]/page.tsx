@@ -618,7 +618,7 @@ export default function AlbumPage() {
 
       {/* Floating save/discard bar */}
       <div
-        className='fixed bottom-6 left-0 right-0 flex flex-col items-center gap-2 transition-all duration-300'
+        className='fixed bottom-20 left-0 right-0 flex flex-col items-center gap-2 transition-all duration-300 md:bottom-6'
         style={{
           opacity: dirty.size > 0 ? 1 : 0,
           transform: dirty.size > 0 ? "translateY(0)" : "translateY(16px)",

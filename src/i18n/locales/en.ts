@@ -78,6 +78,8 @@ export const en: Translation = {
     appSubtitle: "Collection Manager",
     logOut: "Log out",
     greeting: "Hi",
+    profile: "Profile",
+    language: "Language",
   },
   errors: {
     sessionExpiredTitle: "Session expired",

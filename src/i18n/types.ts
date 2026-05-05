@@ -77,6 +77,8 @@ export interface Translation {
     appSubtitle: string
     logOut: string
     greeting: string
+    profile: string
+    language: string
   }
   errors: {
     sessionExpiredTitle: string

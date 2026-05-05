@@ -55,10 +55,12 @@ export function Navbar() {
             </span>
           )}
 
-          <LanguageSwitcher />
+          <div className="hidden md:block">
+            <LanguageSwitcher />
+          </div>
 
           {/* User menu */}
-          <div className="relative">
+          <div className="relative hidden md:block">
             <Button
               variant="ghost"
               size="icon"

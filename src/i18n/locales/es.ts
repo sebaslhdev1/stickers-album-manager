@@ -78,6 +78,8 @@ export const es: Translation = {
     appSubtitle: "Gestor de Colección",
     logOut: "Cerrar sesión",
     greeting: "Hola",
+    profile: "Perfil",
+    language: "Idioma",
   },
   errors: {
     sessionExpiredTitle: "Sesión expirada",
