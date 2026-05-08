@@ -51,6 +51,7 @@ export default function AlbumPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [dirty, setDirty] = useState<Set<string>>(new Set())
+  const [dirtyCount, setDirtyCount] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -62,7 +63,7 @@ export default function AlbumPage() {
     new Set(),
   )
   const [isPanelOpen, setIsPanelOpen] = useState(false)
-  const [refreshKey, setRefreshKey] = useState(0)
+
   const [savedCompleted, setSavedCompleted] = useState<Set<string>>(new Set())
   const originalAmounts = useRef<Map<string, number>>(new Map())
   const stickersRef = useRef<Sticker[]>([])
@@ -116,15 +117,18 @@ export default function AlbumPage() {
   )
 
   const updateDirty = useCallback((stickerId: string, newAmount: number) => {
+    const original = originalAmounts.current.get(stickerId) ?? 0
+    const prevAmount = stickersRef.current.find((s) => s.id === stickerId)?.amount ?? 0
     setDirty((prev) => {
       const next = new Set(prev)
-      if (newAmount === originalAmounts.current.get(stickerId)) {
+      if (newAmount === original) {
         next.delete(stickerId)
       } else {
         next.add(stickerId)
       }
       return next
     })
+    setDirtyCount((prev) => prev - Math.abs(prevAmount - original) + Math.abs(newAmount - original))
   }, [])
 
   const handleAdd = useCallback(
@@ -160,6 +164,7 @@ export default function AlbumPage() {
       })),
     )
     setDirty(new Set())
+    setDirtyCount(0)
   }
 
   async function handleSave() {
@@ -186,7 +191,8 @@ export default function AlbumPage() {
         return next
       })
       setDirty(new Set())
-      setRefreshKey((k) => k + 1)
+      setDirtyCount(0)
+
       if (!wasComplete && willBeComplete) {
         window.scrollTo({ top: 0, behavior: "smooth" })
         fireConfetti()
@@ -199,12 +205,17 @@ export default function AlbumPage() {
   }
 
   const stats = useMemo(
-    () => ({
-      total: stickers.length,
-      collected: stickers.filter((s) => s.amount > 0).length,
-      missing: stickers.filter((s) => s.amount === 0).length,
-      repeated: stickers.reduce((sum, s) => sum + Math.max(0, s.amount - 1), 0),
-    }),
+    () => {
+      const total = stickers.length
+      const collected = stickers.filter((s) => s.amount > 0).length
+      return {
+        total,
+        collected,
+        missing: stickers.filter((s) => s.amount === 0).length,
+        repeated: stickers.reduce((sum, s) => sum + Math.max(0, s.amount - 1), 0),
+        progress: total > 0 ? Math.round((collected / total) * 100) : 0,
+      }
+    },
     [stickers],
   )
 
@@ -238,23 +249,37 @@ export default function AlbumPage() {
   }
 
   if (isLoading) {
+    const nameLengths = [80, 120, 96, 140, 72, 110, 88, 130, 64, 104]
     return (
       <div className='mx-auto max-w-5xl px-6 py-8'>
+        {/* Back button */}
         <Skeleton className='mb-6 h-4 w-28 rounded-full' />
-        <Skeleton className='mb-8 h-44 w-full rounded-2xl' />
-        <div className='mb-6 flex gap-2'>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className='h-7 w-16 rounded-full' />
-          ))}
+        {/* Album header */}
+        <Skeleton className='mb-6 h-44 w-full rounded-2xl' />
+        {/* Search bar */}
+        <Skeleton className='mb-3 h-9 w-full rounded-xl' />
+        {/* Filter + action row */}
+        <div className='mb-4 flex items-center justify-between'>
+          <div className='flex gap-2'>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className='h-7 w-16 rounded-full' />
+            ))}
+          </div>
+          <Skeleton className='h-7 w-20 rounded-full' />
         </div>
-        <div className='space-y-8'>
-          {Array.from({ length: 3 }).map((_, s) => (
-            <div key={s}>
-              <Skeleton className='mb-3 h-3 w-20 rounded' />
-              <div className='grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10'>
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <Skeleton key={i} className='h-16 rounded-xl' />
-                ))}
+        {/* Section toggles */}
+        <div className='space-y-3 pb-24'>
+          {nameLengths.map((w, i) => (
+            <div key={i} className='overflow-hidden rounded-2xl border border-black/5 bg-white'>
+              <div className='flex items-center justify-between bg-black/3 px-4 py-3'>
+                <div className='flex items-center gap-2'>
+                  <Skeleton className='h-4 w-5 rounded-sm' />
+                  <Skeleton className='h-3 rounded' style={{ width: w }} />
+                </div>
+                <div className='flex items-center gap-2'>
+                  <Skeleton className='h-3 w-10 rounded' />
+                  <Skeleton className='h-3.5 w-3.5 rounded' />
+                </div>
               </div>
             </div>
           ))}
@@ -310,7 +335,7 @@ export default function AlbumPage() {
                 <Trophy className='h-4 w-4 text-white' />
               </div>
             )}
-            <div className='flex items-center md:items-end gap-6 p-6'>
+            <div className='flex items-center md:items-end gap-6 p-6 pb-4'>
               <div className='relative h-36 w-24 shrink-0 overflow-hidden rounded-xl shadow-2xl ring-2 ring-white/20'>
                 <Image
                   src={album.image_url}
@@ -347,6 +372,24 @@ export default function AlbumPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className='px-6 pb-5'>
+              <div className='mb-2 flex items-center justify-between'>
+                <span className='text-[10px] font-semibold uppercase tracking-widest text-white/50'>
+                  {t.album.progress}
+                </span>
+                <span className='text-sm font-black tabular-nums text-white'>
+                  {stats.progress}%
+                </span>
+              </div>
+              <div className='relative h-2 overflow-hidden rounded-full bg-white/20'>
+                <div
+                  className='absolute inset-y-0 left-0 rounded-full bg-white transition-all duration-1000 ease-out'
+                  style={{ width: mounted ? `${stats.progress}%` : "0%" }}
+                />
               </div>
             </div>
           </div>
@@ -646,17 +689,16 @@ export default function AlbumPage() {
             style={{ backgroundColor: colors.primary }}
           >
             <Save className='h-3.5 w-3.5' />
-            {isSaving ? t.album.saving : `${t.album.save} (${dirty.size})`}
+            {isSaving ? t.album.saving : `${t.album.save} (${dirtyCount})`}
           </button>
         </div>
       </div>
 
       <StickersDetailPanel
-        albumId={id}
         colors={colors}
         isOpen={isPanelOpen}
-        refreshKey={refreshKey}
         onClose={() => setIsPanelOpen(false)}
+        stickers={stickers}
       />
     </div>
   )

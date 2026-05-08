@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useState } from "react";
+import { useSyncExternalStore, useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { BookOpen, LogOut, User } from "lucide-react";
 import { useT } from "@/i18n/use-t";
@@ -20,6 +20,25 @@ export function BottomNav() {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const userName = useSyncExternalStore(() => () => {}, () => getUserName(), () => null);
+
+  const [navHidden, setNavHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    function handleScroll() {
+      const currentY = window.scrollY;
+      if (currentY < 10) {
+        setNavHidden(false);
+      } else if (currentY > lastScrollY.current) {
+        setNavHidden(true);
+      } else {
+        setNavHidden(false);
+      }
+      lastScrollY.current = currentY;
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const isHome = pathname === "/";
   const profileOpen = mounted;
@@ -43,8 +62,12 @@ export function BottomNav() {
   return (
     <>
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-20 flex h-16 items-center border-t"
-        style={{ backgroundColor: "var(--brand-dark)", borderColor: "rgba(255,255,255,0.08)" }}
+        className="md:hidden fixed bottom-0 left-0 right-0 z-20 flex h-16 items-center border-t transition-transform duration-300 ease-in-out"
+        style={{
+          backgroundColor: "var(--brand-dark)",
+          borderColor: "rgba(255,255,255,0.08)",
+          transform: navHidden && !profileOpen ? "translateY(100%)" : "translateY(0)",
+        }}
       >
         <button
           onClick={() => router.push(ROUTES.HOME)}

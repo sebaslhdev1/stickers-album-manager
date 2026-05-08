@@ -1,50 +1,26 @@
 "use client"
 
-import { Skeleton } from "@/components/ui/skeleton"
 import { useT } from "@/i18n/use-t"
-import { getErrorMessage } from "@/lib/errors"
-import { getMissingStickers, getRepeatedStickers } from "@/services/stickers"
-import type { AlbumColors } from "@/types"
+import type { AlbumColors, Sticker } from "@/types"
 import { StickerSection } from "@/components/stickers/sticker-section"
 import { X } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 
 interface Props {
-  albumId: string
   colors: AlbumColors
   isOpen: boolean
-  refreshKey: number
   onClose: () => void
+  stickers: Sticker[]
 }
 
-type PanelResult =
-  | { key: string; status: "success"; missing: string[]; repeated: string[] }
-  | { key: string; status: "error"; message: string }
-
-export function StickersDetailPanel({
-  albumId,
-  colors,
-  isOpen,
-  refreshKey,
-  onClose,
-}: Props) {
+export function StickersDetailPanel({ colors, isOpen, onClose, stickers }: Props) {
   const t = useT()
-  const [result, setResult] = useState<PanelResult | null>(null)
 
-  const fetchKey = `${albumId}-${refreshKey}`
-  const isLoading = isOpen && result?.key !== fetchKey
+  const missing = stickers.filter((s) => s.amount === 0).map((s) => s.number)
 
-  useEffect(() => {
-    if (!isOpen) return
-    const key = `${albumId}-${refreshKey}`
-    Promise.all([getMissingStickers(albumId), getRepeatedStickers(albumId)])
-      .then(([missing, repeated]) =>
-        setResult({ key, status: "success", missing, repeated }),
-      )
-      .catch((err) =>
-        setResult({ key, status: "error", message: getErrorMessage(err) }),
-      )
-  }, [isOpen, albumId, refreshKey])
+  const repeated = stickers.flatMap((s) =>
+    Array.from({ length: Math.max(0, s.amount - 1) }, () => s.number),
+  )
 
   useEffect(() => {
     if (!isOpen) return
@@ -88,39 +64,22 @@ export function StickersDetailPanel({
 
         {/* Content */}
         <div className='min-h-0 flex-1 overflow-y-auto p-5 pb-20 md:pb-5'>
-          {isLoading ? (
-            <div className='space-y-6'>
-              {[1, 2].map((i) => (
-                <div key={i}>
-                  <Skeleton className='mb-3 h-4 w-24 rounded' />
-                  <div className='flex flex-wrap gap-2'>
-                    {Array.from({ length: 8 }).map((_, j) => (
-                      <Skeleton key={j} className='h-6 w-14 rounded-full' />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : result?.status === "error" ? (
-            <p className='text-sm text-destructive'>{result.message}</p>
-          ) : result?.status === "success" ? (
-            <div className='space-y-8'>
-              <StickerSection
-                title={t.stickers.missing}
-                count={result.missing.length}
-                items={result.missing}
-                chipColor={colors.accent}
-                emptyText={t.stickers.noMissing}
-              />
-              <StickerSection
-                title={t.stickers.repeated}
-                count={result.repeated.length}
-                items={result.repeated}
-                chipColor={colors.primary}
-                emptyText={t.stickers.noRepeated}
-              />
-            </div>
-          ) : null}
+          <div className='space-y-8'>
+            <StickerSection
+              title={t.stickers.missing}
+              count={missing.length}
+              items={missing}
+              chipColor={colors.accent}
+              emptyText={t.stickers.noMissing}
+            />
+            <StickerSection
+              title={t.stickers.repeated}
+              count={repeated.length}
+              items={repeated}
+              chipColor={colors.primary}
+              emptyText={t.stickers.noRepeated}
+            />
+          </div>
         </div>
       </div>
     </>

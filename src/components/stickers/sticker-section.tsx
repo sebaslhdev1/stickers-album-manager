@@ -77,9 +77,9 @@ export function StickerSection({
               <p className='text-sm text-muted-foreground'>{emptyText}</p>
             ) : (
               <div className='flex flex-wrap gap-1.5'>
-                {items.map((name) => (
+                {items.map((name, i) => (
                   <span
-                    key={name}
+                    key={`${name}-${i}`}
                     className='rounded-full px-2.5 py-1 text-xs font-semibold text-white'
                     style={{ backgroundColor: chipColor }}
                   >
