@@ -18,7 +18,7 @@ interface Props {
 }
 
 type SearchResult =
-  | { status: "success"; myOffer: string[]; theirOffer: string[] }
+  | { status: "success"; myOffer: string[]; theirOffer: string[]; userName: string }
   | { status: "not_found" }
   | { status: "error"; message: string }
 
@@ -37,7 +37,7 @@ export function ExchangePanel({ albumId, colors, isOpen, onClose }: Props) {
     setResult(null)
     try {
       const data = await getMatchingStickers(albumId, code)
-      setResult({ status: "success", myOffer: data.my_offer, theirOffer: data.their_offer })
+      setResult({ status: "success", myOffer: data.my_offer, theirOffer: data.their_offer, userName: data.exchange_user_name })
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status
       if (status === 404) {
@@ -186,6 +186,10 @@ export function ExchangePanel({ albumId, colors, isOpen, onClose }: Props) {
           {/* Results */}
           {result?.status === "success" && (
             <div className="space-y-8">
+              <div className="flex items-center gap-2 rounded-xl px-3 py-2.5" style={{ backgroundColor: `${colors.primary}12` }}>
+                <span className="text-xs text-gray-500">{t.exchange.tradingWith}</span>
+                <span className="text-sm font-bold" style={{ color: colors.primary }}>{result.userName}</span>
+              </div>
               <StickerSection
                 title={t.exchange.myOffer}
                 count={result.myOffer.length}

@@ -83,6 +83,7 @@ export const en: Translation = {
     theirOffer: "You can receive",
     noMyOffer: "No repeated stickers to offer.",
     noTheirOffer: "No stickers to receive.",
+    tradingWith: "Trading with",
     emptyState: "Find a trading partner",
     emptyStateHint: "Enter their user code to see which stickers you can exchange.",
     userNotFound: "No user found with that code. Double-check and try again.",

@@ -82,6 +82,7 @@ export interface Translation {
     theirOffer: string
     noMyOffer: string
     noTheirOffer: string
+    tradingWith: string
     emptyState: string
     emptyStateHint: string
     userNotFound: string

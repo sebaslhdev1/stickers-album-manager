@@ -48,14 +48,19 @@ interface ApiStickerMatch {
 export async function getMatchingStickers(
   albumId: string,
   userCode: string,
-): Promise<{ my_offer: string[]; their_offer: string[] }> {
-  const res = await api.post<{ my_offer: ApiStickerMatch[]; their_offer: ApiStickerMatch[] }>(
+): Promise<{ my_offer: string[]; their_offer: string[]; exchange_user_name: string }> {
+  const res = await api.post<{
+    my_offer: ApiStickerMatch[]
+    their_offer: ApiStickerMatch[]
+    exchange_user_name: string
+  }>(
     "/get_matching_stickers",
     { album_id: albumId, user_code: userCode },
   )
   return {
     my_offer: res.data.my_offer.map((s) => s.sticker_name),
     their_offer: res.data.their_offer.map((s) => s.sticker_name),
+    exchange_user_name: res.data.exchange_user_name,
   }
 }
 
