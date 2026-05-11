@@ -72,6 +72,20 @@ export interface Translation {
     copy: string
     copied: string
   }
+  exchange: {
+    title: string
+    yourCode: string
+    searchPlaceholder: string
+    search: string
+    searching: string
+    myOffer: string
+    theirOffer: string
+    noMyOffer: string
+    noTheirOffer: string
+    emptyState: string
+    emptyStateHint: string
+    userNotFound: string
+  }
   navbar: {
     appTitle: string
     appSubtitle: string

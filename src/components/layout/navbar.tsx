@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { LogOut, User } from "lucide-react";
+import { Check, Copy, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/i18n/use-t";
 import { logout } from "@/services/auth";
-import { getUserName } from "@/lib/token";
+import { getUserCode, getUserName } from "@/lib/token";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ROUTES } from "@/constants";
 
@@ -16,7 +16,16 @@ export function Navbar() {
   const router = useRouter();
   const t = useT();
   const [open, setOpen] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
   const userName = useSyncExternalStore(() => () => {}, () => getUserName(), () => null);
+  const userCode = useSyncExternalStore(() => () => {}, () => getUserCode(), () => null);
+
+  function handleCopyCode() {
+    if (!userCode) return;
+    navigator.clipboard.writeText(userCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  }
 
   async function handleLogout() {
     await logout();
@@ -48,10 +57,20 @@ export function Navbar() {
 
         {/* Right side controls */}
         <div className="flex items-center gap-1 -mr-2">
-          {/* Greeting */}
+          {/* Greeting + user code badge */}
           {userName && (
-            <span className="hidden sm:block text-sm text-white/70 pr-1">
+            <span className="hidden sm:flex items-center gap-2 text-sm text-white/70 pr-1">
               {t.navbar.greeting}, <span className="font-semibold text-white">{userName}</span>
+              {userCode && (
+                <button
+                  onClick={handleCopyCode}
+                  className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-widest transition-colors hover:bg-white/20"
+                  style={{ backgroundColor: "rgba(255,255,255,0.12)", color: codeCopied ? "#86efac" : "rgba(255,255,255,0.7)" }}
+                >
+                  {codeCopied ? <Check className="h-2.5 w-2.5" /> : <Copy className="h-2.5 w-2.5" />}
+                  {codeCopied ? t.stickers.copied : userCode}
+                </button>
+              )}
             </span>
           )}
 

@@ -33,6 +33,21 @@ export function removeUserName(): void {
   localStorage.removeItem(USER_NAME_KEY)
 }
 
+const USER_CODE_KEY = "user_code"
+
+export function getUserCode(): string | null {
+  if (typeof window === "undefined") return null
+  return localStorage.getItem(USER_CODE_KEY)
+}
+
+export function setUserCode(code: string): void {
+  localStorage.setItem(USER_CODE_KEY, code)
+}
+
+export function removeUserCode(): void {
+  localStorage.removeItem(USER_CODE_KEY)
+}
+
 export function getRefreshToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(REFRESH_TOKEN_KEY);

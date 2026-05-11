@@ -1,5 +1,6 @@
 "use client"
 
+import { ExchangePanel } from "@/components/stickers/exchange-panel"
 import { StickerCard } from "@/components/stickers/sticker-card"
 import { StickersDetailPanel } from "@/components/stickers/stickers-detail-panel"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -13,6 +14,7 @@ import { getStickers, saveStickers } from "@/services/stickers"
 import type { Album, AlbumColors, Sticker } from "@/types"
 import {
   ArrowLeft,
+  ArrowLeftRight,
   CheckCircle2,
   ChevronDown,
   List,
@@ -24,7 +26,14 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { useParams, useRouter } from "next/navigation"
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 const DEFAULT_COLORS: AlbumColors = {
   primary: "#3b82f6",
@@ -63,6 +72,7 @@ export default function AlbumPage() {
     new Set(),
   )
   const [isPanelOpen, setIsPanelOpen] = useState(false)
+  const [isExchangeOpen, setIsExchangeOpen] = useState(false)
 
   const [savedCompleted, setSavedCompleted] = useState<Set<string>>(new Set())
   const originalAmounts = useRef<Map<string, number>>(new Map())
@@ -105,6 +115,12 @@ export default function AlbumPage() {
     return () => window.removeEventListener("beforeunload", handler)
   }, [dirty.size])
 
+  useEffect(() => {
+    const handler = () => setIsExchangeOpen(true)
+    window.addEventListener("open:exchange", handler)
+    return () => window.removeEventListener("open:exchange", handler)
+  }, [])
+
   const colors = album?.colors ?? DEFAULT_COLORS
 
   const sections = useMemo(
@@ -118,7 +134,8 @@ export default function AlbumPage() {
 
   const updateDirty = useCallback((stickerId: string, newAmount: number) => {
     const original = originalAmounts.current.get(stickerId) ?? 0
-    const prevAmount = stickersRef.current.find((s) => s.id === stickerId)?.amount ?? 0
+    const prevAmount =
+      stickersRef.current.find((s) => s.id === stickerId)?.amount ?? 0
     setDirty((prev) => {
       const next = new Set(prev)
       if (newAmount === original) {
@@ -128,7 +145,10 @@ export default function AlbumPage() {
       }
       return next
     })
-    setDirtyCount((prev) => prev - Math.abs(prevAmount - original) + Math.abs(newAmount - original))
+    setDirtyCount(
+      (prev) =>
+        prev - Math.abs(prevAmount - original) + Math.abs(newAmount - original),
+    )
   }, [])
 
   const handleAdd = useCallback(
@@ -204,20 +224,17 @@ export default function AlbumPage() {
     }
   }
 
-  const stats = useMemo(
-    () => {
-      const total = stickers.length
-      const collected = stickers.filter((s) => s.amount > 0).length
-      return {
-        total,
-        collected,
-        missing: stickers.filter((s) => s.amount === 0).length,
-        repeated: stickers.reduce((sum, s) => sum + Math.max(0, s.amount - 1), 0),
-        progress: total > 0 ? Math.round((collected / total) * 100) : 0,
-      }
-    },
-    [stickers],
-  )
+  const stats = useMemo(() => {
+    const total = stickers.length
+    const collected = stickers.filter((s) => s.amount > 0).length
+    return {
+      total,
+      collected,
+      missing: stickers.filter((s) => s.amount === 0).length,
+      repeated: stickers.reduce((sum, s) => sum + Math.max(0, s.amount - 1), 0),
+      progress: total > 0 ? Math.round((collected / total) * 100) : 0,
+    }
+  }, [stickers])
 
   const isComplete =
     stickers.length > 0 && savedCompleted.size === stickers.length
@@ -270,7 +287,10 @@ export default function AlbumPage() {
         {/* Section toggles */}
         <div className='space-y-3 pb-24'>
           {nameLengths.map((w, i) => (
-            <div key={i} className='overflow-hidden rounded-2xl border border-black/5 bg-white'>
+            <div
+              key={i}
+              className='overflow-hidden rounded-2xl border border-black/5 bg-white'
+            >
               <div className='flex items-center justify-between bg-black/3 px-4 py-3'>
                 <div className='flex items-center gap-2'>
                   <Skeleton className='h-4 w-5 rounded-sm' />
@@ -319,7 +339,9 @@ export default function AlbumPage() {
         {/* Album header */}
         {album && (
           <div
-            className={`mb-8 overflow-hidden rounded-2xl shadow-xl transition-all duration-500${isComplete ? " ring-4 ring-yellow-400/50 ring-offset-2" : ""}`}
+            className={`mb-8 overflow-hidden rounded-2xl shadow-xl transition-all duration-500${
+              isComplete ? " ring-4 ring-yellow-400/50 ring-offset-2" : ""
+            }`}
             style={{
               background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
               opacity: mounted ? 1 : 0,
@@ -457,9 +479,7 @@ export default function AlbumPage() {
                     collapsedSections.has(s),
                   )
                   setCollapsedSections(
-                    allCollapsed
-                      ? new Set()
-                      : new Set(Object.keys(sections)),
+                    allCollapsed ? new Set() : new Set(Object.keys(sections)),
                   )
                 }}
                 className='cursor-pointer text-xs font-semibold transition-opacity hover:opacity-70'
@@ -476,6 +496,14 @@ export default function AlbumPage() {
               >
                 <List className='h-3.5 w-3.5' />
                 {t.album.details}
+              </button>
+              <button
+                onClick={() => setIsExchangeOpen(true)}
+                className='hidden md:flex items-center gap-1.5 cursor-pointer rounded-full px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-80'
+                style={{ backgroundColor: colors.accent }}
+              >
+                <ArrowLeftRight className='h-3.5 w-3.5' />
+                {t.exchange.title}
               </button>
             </div>
           </div>
@@ -534,125 +562,144 @@ export default function AlbumPage() {
             const allEntries = Object.entries(sections)
             const searchMatches = !q
               ? allEntries
-              : allEntries.filter(([section]) =>
-                  getCountry(section).name.toLowerCase().includes(q) ||
-                  section.toLowerCase().includes(q),
+              : allEntries.filter(
+                  ([section]) =>
+                    getCountry(section).name.toLowerCase().includes(q) ||
+                    section.toLowerCase().includes(q),
                 )
             const noSearchMatch = q.length > 0 && searchMatches.length === 0
             const entriesToShow = noSearchMatch ? allEntries : searchMatches
             return (
               <>
                 {noSearchMatch && (
-                  <p className='mb-2 text-xs' style={{ color: withAlpha(colors.primary, 0.6) }}>
+                  <p
+                    className='mb-2 text-xs'
+                    style={{ color: withAlpha(colors.primary, 0.6) }}
+                  >
                     {t.album.searchNoMatch}
                   </p>
                 )}
                 {entriesToShow
-                  .filter(([section]) => activeSections.size === 0 || activeSections.has(section))
-            .map(([section, sectionStickers], index) => {
-              const total = sectionStickers.length
-              const collected = sectionStickers.filter((s) => s.amount > 0).length
-              const done = collected === total
-              const isCollapsed = collapsedSections.has(section)
-              return (
-                <section
-                  key={section}
-                  className='overflow-hidden rounded-2xl transition-all duration-500'
-                  style={{
-                    transitionDelay: `${index * 60}ms`,
-                    opacity: mounted ? 1 : 0,
-                    transform: mounted ? "translateY(0)" : "translateY(12px)",
-                    backgroundColor: colors.card,
-                    border: `1px solid ${done ? "#bbf7d0" : withAlpha(colors.primary, 0.15)}`,
-                    boxShadow: `0 2px 8px ${done ? "rgba(22,163,74,0.10)" : withAlpha(colors.primary, 0.07)}`,
-                  }}
-                >
-                  <button
-                    onClick={() =>
-                      setCollapsedSections((prev) => {
-                        const next = new Set(prev)
-                        if (next.has(section)) next.delete(section)
-                        else next.add(section)
-                        return next
-                      })
-                    }
-                    className='flex w-full cursor-pointer items-center justify-between px-4 py-3 transition-colors'
-                    style={{
-                      backgroundColor: done
-                        ? "#f0fdf4"
-                        : withAlpha(colors.primary, 0.06),
-                    }}
-                  >
-                    <h2
-                      className='flex items-center gap-2 text-sm font-bold tracking-tight'
-                      style={{ color: done ? "#15803d" : colors.primary }}
-                    >
-                      {isSectionCountry(section) ? (
-                        <span
-                          className={`fi fi-${getCountry(section).isoCode} rounded-sm`}
-                          style={{ fontSize: "1.1em" }}
-                        />
-                      ) : (
-                        <Star
-                          className='h-3.5 w-3.5'
-                          fill='#facc15'
-                          color='#facc15'
-                        />
-                      )}
-                      {getCountry(section).name}
-                    </h2>
-                    <div className='flex items-center gap-2'>
-                      {done ? (
-                        <span className='flex items-center gap-1 rounded-full bg-green-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white'>
-                          <CheckCircle2 className='h-3 w-3' />
-                          {t.album.complete}
-                        </span>
-                      ) : (
-                        <span
-                          className='text-[11px] font-semibold tabular-nums'
-                          style={{ color: colors.primary }}
-                        >
-                          {collected} / {total}
-                        </span>
-                      )}
-                      <ChevronDown
-                        className='h-3.5 w-3.5 transition-transform duration-200'
+                  .filter(
+                    ([section]) =>
+                      activeSections.size === 0 || activeSections.has(section),
+                  )
+                  .map(([section, sectionStickers], index) => {
+                    const total = sectionStickers.length
+                    const collected = sectionStickers.filter(
+                      (s) => s.amount > 0,
+                    ).length
+                    const done = collected === total
+                    const isCollapsed = collapsedSections.has(section)
+                    return (
+                      <section
+                        key={section}
+                        className='overflow-hidden rounded-2xl transition-all duration-500'
                         style={{
-                          color: done ? "#15803d" : colors.primary,
-                          transform: isCollapsed
-                            ? "rotate(0deg)"
-                            : "rotate(180deg)",
+                          transitionDelay: `${index * 60}ms`,
+                          opacity: mounted ? 1 : 0,
+                          transform: mounted
+                            ? "translateY(0)"
+                            : "translateY(12px)",
+                          backgroundColor: colors.card,
+                          border: `1px solid ${
+                            done ? "#bbf7d0" : withAlpha(colors.primary, 0.15)
+                          }`,
+                          boxShadow: `0 2px 8px ${
+                            done
+                              ? "rgba(22,163,74,0.10)"
+                              : withAlpha(colors.primary, 0.07)
+                          }`,
                         }}
-                      />
-                    </div>
-                  </button>
-                  <div
-                    className='grid'
-                    style={{
-                      gridTemplateRows: isCollapsed ? "0fr" : "1fr",
-                      transition: "grid-template-rows 280ms ease-in-out",
-                    }}
-                  >
-                    <div className='overflow-hidden'>
-                      <div className='p-4'>
-                        <div className='grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10'>
-                          {sectionStickers.map((sticker) => (
-                            <StickerCard
-                              key={sticker.id}
-                              id={sticker.id}
-                              number={sticker.number}
-                              amount={sticker.amount}
-                              onAdd={handleAdd}
-                              onRemove={handleRemove}
+                      >
+                        <button
+                          onClick={() =>
+                            setCollapsedSections((prev) => {
+                              const next = new Set(prev)
+                              if (next.has(section)) next.delete(section)
+                              else next.add(section)
+                              return next
+                            })
+                          }
+                          className='flex w-full cursor-pointer items-center justify-between px-4 py-3 transition-colors'
+                          style={{
+                            backgroundColor: done
+                              ? "#f0fdf4"
+                              : withAlpha(colors.primary, 0.06),
+                          }}
+                        >
+                          <h2
+                            className='flex items-center gap-2 text-sm font-bold tracking-tight'
+                            style={{ color: done ? "#15803d" : colors.primary }}
+                          >
+                            {isSectionCountry(section) ? (
+                              <span
+                                className={`fi fi-${
+                                  getCountry(section).isoCode
+                                } rounded-sm`}
+                                style={{ fontSize: "1.1em" }}
+                              />
+                            ) : (
+                              <Star
+                                className='h-3.5 w-3.5'
+                                fill='#facc15'
+                                color='#facc15'
+                              />
+                            )}
+                            {getCountry(section).name}
+                          </h2>
+                          <div className='flex items-center gap-2'>
+                            {done ? (
+                              <span className='flex items-center gap-1 rounded-full bg-green-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white'>
+                                <CheckCircle2 className='h-3 w-3' />
+                                {t.album.complete}
+                              </span>
+                            ) : (
+                              <span
+                                className='text-[11px] font-semibold tabular-nums'
+                                style={{ color: colors.primary }}
+                              >
+                                {collected} / {total}
+                              </span>
+                            )}
+                            <ChevronDown
+                              className='h-3.5 w-3.5 transition-transform duration-200'
+                              style={{
+                                color: done ? "#15803d" : colors.primary,
+                                transform: isCollapsed
+                                  ? "rotate(0deg)"
+                                  : "rotate(180deg)",
+                              }}
                             />
-                          ))}
+                          </div>
+                        </button>
+                        <div
+                          className='grid'
+                          style={{
+                            gridTemplateRows: isCollapsed ? "0fr" : "1fr",
+                            transition: "grid-template-rows 280ms ease-in-out",
+                          }}
+                        >
+                          <div className='overflow-hidden'>
+                            <div className='p-4'>
+                              <div className='grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10'>
+                                {sectionStickers.map((sticker) => (
+                                  <StickerCard
+                                    key={sticker.id}
+                                    id={sticker.id}
+                                    number={sticker.number}
+                                    amount={sticker.amount}
+                                    onAdd={handleAdd}
+                                    onRemove={handleRemove}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              )
-            })}
+                      </section>
+                    )
+                  })}
               </>
             )
           })()}
@@ -699,6 +746,13 @@ export default function AlbumPage() {
         isOpen={isPanelOpen}
         onClose={() => setIsPanelOpen(false)}
         stickers={stickers}
+      />
+
+      <ExchangePanel
+        albumId={id}
+        colors={colors}
+        isOpen={isExchangeOpen}
+        onClose={() => setIsExchangeOpen(false)}
       />
     </div>
   )
