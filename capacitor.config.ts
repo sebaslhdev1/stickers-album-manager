@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli"
 
 const config: CapacitorConfig = {
-  appId: "com.kardkeeper.app",
+  appId: "com.kardkeeper.mobile",
   appName: "KardKeeper",
   webDir: "public",
   server: {
