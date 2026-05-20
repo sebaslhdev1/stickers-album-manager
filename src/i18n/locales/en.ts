@@ -87,6 +87,7 @@ export const en: Translation = {
     emptyState: "Find a trading partner",
     emptyStateHint: "Enter their user code to see which stickers you can exchange.",
     userNotFound: "No user found with that code. Double-check and try again.",
+    recentSearches: "Recent",
   },
   navbar: {
     appTitle: "KardKeeper",

@@ -86,6 +86,7 @@ export interface Translation {
     emptyState: string
     emptyStateHint: string
     userNotFound: string
+    recentSearches: string
   }
   navbar: {
     appTitle: string

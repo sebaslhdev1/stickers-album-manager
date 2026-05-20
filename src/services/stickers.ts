@@ -64,6 +64,16 @@ export async function getMatchingStickers(
   }
 }
 
+export interface SearchedUser {
+  user_code: string
+  name: string
+}
+
+export async function getSearchedCodes(): Promise<SearchedUser[]> {
+  const res = await api.get<SearchedUser[]>("/searched_codes")
+  return res.data
+}
+
 export async function saveStickers(
   albumId: string,
   stickers: Pick<Sticker, "id" | "number" | "amount">[]

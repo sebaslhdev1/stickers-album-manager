@@ -5,9 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useT } from "@/i18n/use-t"
 import { getErrorMessage } from "@/lib/errors"
 import { getUserCode } from "@/lib/token"
-import { getMatchingStickers } from "@/services/stickers"
+import type { SearchedUser } from "@/services/stickers"
+import { getMatchingStickers, getSearchedCodes } from "@/services/stickers"
 import type { AlbumColors } from "@/types"
-import { ArrowLeftRight, Search, X } from "lucide-react"
+import { ArrowLeft, ArrowLeftRight, Check, Copy, Search, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 interface Props {
@@ -18,7 +19,12 @@ interface Props {
 }
 
 type SearchResult =
-  | { status: "success"; myOffer: string[]; theirOffer: string[]; userName: string }
+  | {
+      status: "success"
+      myOffer: string[]
+      theirOffer: string[]
+      userName: string
+    }
   | { status: "not_found" }
   | { status: "error"; message: string }
 
@@ -27,19 +33,34 @@ export function ExchangePanel({ albumId, colors, isOpen, onClose }: Props) {
   const [inputCode, setInputCode] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [result, setResult] = useState<SearchResult | null>(null)
+  const [recentUsers, setRecentUsers] = useState<SearchedUser[]>([])
+  const [isLoadingRecents, setIsLoadingRecents] = useState(false)
+  const [codeCopied, setCodeCopied] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const myCode = getUserCode()
 
-  async function handleSearch() {
-    const code = inputCode.trim().toUpperCase()
+  function handleCopyCode() {
+    if (!myCode) return
+    navigator.clipboard.writeText(myCode)
+    setCodeCopied(true)
+    setTimeout(() => setCodeCopied(false), 2000)
+  }
+
+  async function performSearch(code: string) {
     if (!code || isSearching) return
     setIsSearching(true)
     setResult(null)
     try {
       const data = await getMatchingStickers(albumId, code)
-      setResult({ status: "success", myOffer: data.my_offer, theirOffer: data.their_offer, userName: data.exchange_user_name })
+      setResult({
+        status: "success",
+        myOffer: data.my_offer,
+        theirOffer: data.their_offer,
+        userName: data.exchange_user_name,
+      })
     } catch (err) {
-      const status = (err as { response?: { status?: number } })?.response?.status
+      const status = (err as { response?: { status?: number } })?.response
+        ?.status
       if (status === 404) {
         setResult({ status: "not_found" })
       } else {
@@ -48,6 +69,33 @@ export function ExchangePanel({ albumId, colors, isOpen, onClose }: Props) {
     } finally {
       setIsSearching(false)
     }
+  }
+
+  function handleSearch() {
+    performSearch(inputCode.trim().toUpperCase())
+  }
+
+  function handleSelectRecent(user: SearchedUser) {
+    setInputCode(user.user_code)
+    performSearch(user.user_code)
+  }
+
+  async function fetchRecents() {
+    setIsLoadingRecents(true)
+    try {
+      const data = await getSearchedCodes()
+      setRecentUsers(data)
+    } catch {
+      // silent
+    } finally {
+      setIsLoadingRecents(false)
+    }
+  }
+
+  function handleBack() {
+    setResult(null)
+    setInputCode("")
+    fetchRecents()
   }
 
   useEffect(() => {
@@ -62,6 +110,7 @@ export function ExchangePanel({ albumId, colors, isOpen, onClose }: Props) {
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 320)
+      setTimeout(() => fetchRecents(), 0)
     } else {
       setTimeout(() => {
         setInputCode("")
@@ -74,93 +123,191 @@ export function ExchangePanel({ albumId, colors, isOpen, onClose }: Props) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-30 bg-black/30 backdrop-blur-sm transition-opacity duration-300"
-        style={{ opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? "auto" : "none" }}
+        className='fixed inset-0 z-30 bg-black/30 backdrop-blur-sm transition-opacity duration-300'
+        style={{
+          opacity: isOpen ? 1 : 0,
+          pointerEvents: isOpen ? "auto" : "none",
+        }}
         onClick={onClose}
       />
 
       {/* Panel */}
       <div
-        className="fixed bottom-0 right-0 top-0 z-40 flex w-full flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out sm:w-96"
+        className='fixed bottom-0 right-0 top-0 z-40 flex w-full flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out sm:w-96'
         style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
       >
         {/* Header */}
         <div
-          className="shrink-0 px-5 py-4"
+          className='shrink-0 px-5 py-4'
           style={{ backgroundColor: colors.primary }}
         >
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2">
-              <ArrowLeftRight className="h-4 w-4 text-white" />
-              <h2 className="text-sm font-bold text-white">{t.exchange.title}</h2>
+          <div className='flex items-start justify-between'>
+            <div className='flex items-center gap-2'>
+              <ArrowLeftRight className='h-4 w-4 text-white' />
+              <h2 className='text-sm font-bold text-white'>
+                {t.exchange.title}
+              </h2>
             </div>
-            <button onClick={onClose} className="text-white/70 transition-colors hover:text-white">
-              <X className="h-5 w-5" />
+            <button
+              onClick={onClose}
+              className='text-white/70 transition-colors hover:text-white'
+            >
+              <X className='h-5 w-5' />
             </button>
           </div>
           {myCode && (
-            <div className="mt-2.5 flex items-center gap-1.5 self-start rounded-full bg-white/15 px-2.5 py-1 w-fit">
-              <span className="text-[10px] font-medium text-white/60">{t.exchange.yourCode}:</span>
-              <span className="text-xs font-black tracking-widest text-white">{myCode}</span>
-            </div>
+            <button
+              onClick={handleCopyCode}
+              className='mt-2.5 flex w-fit items-center gap-1.5 self-start rounded-full bg-white/15 px-2.5 py-1 transition-opacity cursor-pointer hover:opacity-80'
+            >
+              <span className='text-[10px] font-medium text-white/60'>
+                {t.exchange.yourCode}:
+              </span>
+              {codeCopied ? (
+                <Check className='h-2.5 w-2.5 text-green-300' />
+              ) : (
+                <Copy className='h-2.5 w-2.5 text-white/50' />
+              )}
+              <span
+                className={`text-xs font-black tracking-widest ${
+                  codeCopied ? "text-green-300" : "text-white"
+                }`}
+              >
+                {codeCopied ? t.stickers.copied : myCode}
+              </span>
+            </button>
           )}
         </div>
 
         {/* Search bar */}
-        <div className="shrink-0 border-b px-5 py-4" style={{ borderColor: "rgba(0,0,0,0.07)" }}>
-          <div className="flex gap-2">
+        <div
+          className='shrink-0 border-b px-5 py-4'
+          style={{ borderColor: "rgba(0,0,0,0.07)" }}
+        >
+          <div className='flex gap-2'>
+            {result && (
+              <button
+                onClick={handleBack}
+                className='flex shrink-0 items-center justify-center rounded-xl px-3 transition-colors hover:bg-gray-50 active:bg-gray-100'
+                style={{
+                  borderColor: "rgba(0,0,0,0.12)",
+                  color: colors.primary,
+                }}
+              >
+                <ArrowLeft className='h-4 w-4' />
+              </button>
+            )}
             <input
               ref={inputRef}
               value={inputCode}
               onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSearch() }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch()
+              }}
               placeholder={t.exchange.searchPlaceholder}
               maxLength={6}
-              className="min-w-0 flex-1 rounded-xl border px-3 py-2 text-sm font-mono tracking-widest outline-none transition-colors placeholder:font-sans placeholder:tracking-normal placeholder:text-gray-400 focus:ring-2"
-              style={{
-                borderColor: "rgba(0,0,0,0.12)",
-                color: colors.primary,
-              }}
+              className='min-w-0 flex-1 rounded-xl border px-3 py-2 text-sm font-mono tracking-widest outline-none transition-colors placeholder:font-sans placeholder:tracking-normal placeholder:text-gray-400 focus:ring-2'
+              style={{ borderColor: "rgba(0,0,0,0.12)", color: colors.primary }}
             />
             <button
               onClick={handleSearch}
               disabled={!inputCode.trim() || isSearching}
-              className="flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+              className='flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity disabled:opacity-50'
               style={{ backgroundColor: colors.primary }}
             >
-              <Search className="h-3.5 w-3.5" />
+              <Search className='h-3.5 w-3.5' />
               {isSearching ? t.exchange.searching : t.exchange.search}
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="min-h-0 flex-1 overflow-y-auto p-5 pb-20 md:pb-5">
-          {/* Empty state */}
-          {!result && !isSearching && (
-            <div className="flex flex-col items-center justify-center gap-3 pt-12 text-center">
-              <div
-                className="flex h-14 w-14 items-center justify-center rounded-2xl"
-                style={{ backgroundColor: `${colors.primary}18` }}
-              >
-                <ArrowLeftRight className="h-6 w-6" style={{ color: colors.primary }} />
+        <div className='min-h-0 flex-1 overflow-y-auto p-5 pb-20 md:pb-5'>
+          {/* Empty state — no recents */}
+          {!result &&
+            !isSearching &&
+            !isLoadingRecents &&
+            recentUsers.length === 0 && (
+              <div className='flex flex-col items-center justify-center gap-3 pt-12 text-center'>
+                <div
+                  className='flex h-14 w-14 items-center justify-center rounded-2xl'
+                  style={{ backgroundColor: `${colors.primary}18` }}
+                >
+                  <ArrowLeftRight
+                    className='h-6 w-6'
+                    style={{ color: colors.primary }}
+                  />
+                </div>
+                <p
+                  className='text-sm font-semibold'
+                  style={{ color: colors.primary }}
+                >
+                  {t.exchange.emptyState}
+                </p>
+                <p className='max-w-55 text-xs text-gray-400'>
+                  {t.exchange.emptyStateHint}
+                </p>
               </div>
-              <p className="text-sm font-semibold" style={{ color: colors.primary }}>
-                {t.exchange.emptyState}
-              </p>
-              <p className="max-w-55 text-xs text-gray-400">{t.exchange.emptyStateHint}</p>
+            )}
+
+          {/* Recent searches skeleton */}
+          {!result && !isSearching && isLoadingRecents && (
+            <div className='flex flex-col gap-1'>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className='flex items-center justify-between px-3 py-2.5'
+                >
+                  <Skeleton className='h-4 w-32 rounded-full' />
+                  <Skeleton className='h-5 w-16 rounded-full' />
+                </div>
+              ))}
             </div>
           )}
 
+          {/* Recent searches list */}
+          {!result &&
+            !isSearching &&
+            !isLoadingRecents &&
+            recentUsers.length > 0 && (
+              <div>
+                <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400'>
+                  {t.exchange.recentSearches}
+                </p>
+                <div className='flex flex-col gap-1'>
+                  {recentUsers.map((user) => (
+                    <button
+                      key={user.user_code}
+                      onClick={() => handleSelectRecent(user)}
+                      className='flex items-center justify-between rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-gray-50 active:bg-gray-100'
+                    >
+                      <span className='text-sm font-medium text-gray-800'>
+                        {user.name}
+                      </span>
+                      <span
+                        className='rounded-full px-2 py-0.5 font-mono text-xs font-bold tracking-widest'
+                        style={{
+                          backgroundColor: `${colors.primary}14`,
+                          color: colors.primary,
+                        }}
+                      >
+                        {user.user_code}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
           {/* Loading */}
           {isSearching && (
-            <div className="space-y-6">
+            <div className='space-y-6'>
               {[1, 2].map((i) => (
                 <div key={i}>
-                  <Skeleton className="mb-3 h-4 w-28 rounded" />
-                  <div className="flex flex-wrap gap-2">
+                  <Skeleton className='mb-3 h-4 w-28 rounded' />
+                  <div className='flex flex-wrap gap-2'>
                     {Array.from({ length: 6 }).map((_, j) => (
-                      <Skeleton key={j} className="h-6 w-14 rounded-full" />
+                      <Skeleton key={j} className='h-6 w-14 rounded-full' />
                     ))}
                   </div>
                 </div>
@@ -168,42 +315,56 @@ export function ExchangePanel({ albumId, colors, isOpen, onClose }: Props) {
             </div>
           )}
 
-          {/* Not found */}
-          {result?.status === "not_found" && (
-            <div className="flex flex-col items-center justify-center gap-3 pt-12 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50">
-                <span className="text-2xl">🔍</span>
-              </div>
-              <p className="max-w-55 text-sm text-red-500">{t.exchange.userNotFound}</p>
-            </div>
-          )}
+          {/* Result views */}
+          {result && (
+            <div className='space-y-6'>
+              {result.status === "not_found" && (
+                <div className='flex flex-col items-center justify-center gap-3 pt-8 text-center'>
+                  <div className='flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50'>
+                    <span className='text-2xl'>🔍</span>
+                  </div>
+                  <p className='max-w-55 text-sm text-red-500'>
+                    {t.exchange.userNotFound}
+                  </p>
+                </div>
+              )}
 
-          {/* Error */}
-          {result?.status === "error" && (
-            <p className="text-sm text-destructive">{result.message}</p>
-          )}
+              {result.status === "error" && (
+                <p className='text-sm text-destructive'>{result.message}</p>
+              )}
 
-          {/* Results */}
-          {result?.status === "success" && (
-            <div className="space-y-8">
-              <div className="flex items-center gap-2 rounded-xl px-3 py-2.5" style={{ backgroundColor: `${colors.primary}12` }}>
-                <span className="text-xs text-gray-500">{t.exchange.tradingWith}</span>
-                <span className="text-sm font-bold" style={{ color: colors.primary }}>{result.userName}</span>
-              </div>
-              <StickerSection
-                title={t.exchange.myOffer}
-                count={result.myOffer.length}
-                items={result.myOffer}
-                chipColor={colors.accent}
-                emptyText={t.exchange.noMyOffer}
-              />
-              <StickerSection
-                title={t.exchange.theirOffer}
-                count={result.theirOffer.length}
-                items={result.theirOffer}
-                chipColor={colors.primary}
-                emptyText={t.exchange.noTheirOffer}
-              />
+              {result.status === "success" && (
+                <div className='space-y-8'>
+                  <div
+                    className='flex items-center gap-2 rounded-xl px-3 py-2.5'
+                    style={{ backgroundColor: `${colors.primary}12` }}
+                  >
+                    <span className='text-xs text-gray-500'>
+                      {t.exchange.tradingWith}
+                    </span>
+                    <span
+                      className='text-sm font-bold'
+                      style={{ color: colors.primary }}
+                    >
+                      {result.userName}
+                    </span>
+                  </div>
+                  <StickerSection
+                    title={t.exchange.myOffer}
+                    count={result.myOffer.length}
+                    items={result.myOffer}
+                    chipColor={colors.accent}
+                    emptyText={t.exchange.noMyOffer}
+                  />
+                  <StickerSection
+                    title={t.exchange.theirOffer}
+                    count={result.theirOffer.length}
+                    items={result.theirOffer}
+                    chipColor={colors.primary}
+                    emptyText={t.exchange.noTheirOffer}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
