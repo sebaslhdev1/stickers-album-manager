@@ -1,6 +1,7 @@
 "use client"
 
 import { useT } from "@/i18n/use-t"
+import { COUNTRY_FLAGS } from "@/lib/country-flags"
 import type { AlbumColors, Sticker } from "@/types"
 import { StickerSection } from "@/components/stickers/sticker-section"
 import { X } from "lucide-react"
@@ -32,7 +33,11 @@ export function StickersDetailPanel({ colors, isOpen, onClose, stickers }: Props
         if (!groups.has(section)) groups.set(section, [])
         groups.get(section)!.push(number)
       }
-      const lines = [...groups.entries()].map(([sec, nums]) => `${sec}: ${nums.join(", ")}`)
+      const lines = [...groups.entries()].map(([sec, nums]) => {
+        const flag = COUNTRY_FLAGS[sec]
+        const prefix = flag ? `${flag} ` : ""
+        return `${prefix}${sec}: ${nums.join(", ")}`
+      })
       return `${sectionTitle}:\n${lines.join("\n")}\n\n${t.stickers.shareInvite}`
     }
   }
