@@ -72,6 +72,7 @@ export const es: Translation = {
     noRepeated: "No hay stickers repetidos.",
     copy: "Copiar",
     copied: "¡Copiado!",
+    shareInvite: "Te invitamos a usar nuestra app ⚽️🏆: https://kard-keeper.vercel.app/",
   },
   exchange: {
     title: "Intercambio",

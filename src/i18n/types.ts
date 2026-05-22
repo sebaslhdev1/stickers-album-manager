@@ -71,6 +71,7 @@ export interface Translation {
     noRepeated: string
     copy: string
     copied: string
+    shareInvite: string
   }
   exchange: {
     title: string

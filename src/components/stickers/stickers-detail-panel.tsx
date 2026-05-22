@@ -22,6 +22,21 @@ export function StickersDetailPanel({ colors, isOpen, onClose, stickers }: Props
     Array.from({ length: Math.max(0, s.amount - 1) }, () => s.number),
   )
 
+  function formatGrouped(sectionTitle: string) {
+    return (items: string[]) => {
+      const unique = [...new Set(items)]
+      const groups = new Map<string, string[]>()
+      for (const item of unique) {
+        const section = item.replace(/\s*\d+$/, "").trim().toUpperCase()
+        const number = item.match(/\d+$/)?.[0] ?? item
+        if (!groups.has(section)) groups.set(section, [])
+        groups.get(section)!.push(number)
+      }
+      const lines = [...groups.entries()].map(([sec, nums]) => `${sec}: ${nums.join(", ")}`)
+      return `${sectionTitle}:\n${lines.join("\n")}\n\n${t.stickers.shareInvite}`
+    }
+  }
+
   useEffect(() => {
     if (!isOpen) return
     const handler = (e: KeyboardEvent) => {
@@ -71,6 +86,7 @@ export function StickersDetailPanel({ colors, isOpen, onClose, stickers }: Props
               items={missing}
               chipColor={colors.accent}
               emptyText={t.stickers.noMissing}
+              formatCopy={formatGrouped(t.stickers.missing)}
             />
             <StickerSection
               title={t.stickers.repeated}
@@ -78,6 +94,7 @@ export function StickersDetailPanel({ colors, isOpen, onClose, stickers }: Props
               items={repeated}
               chipColor={colors.primary}
               emptyText={t.stickers.noRepeated}
+              formatCopy={formatGrouped(t.stickers.repeated)}
             />
           </div>
         </div>

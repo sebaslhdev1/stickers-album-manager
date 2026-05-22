@@ -10,6 +10,7 @@ interface Props {
   items: string[]
   chipColor: string
   emptyText: string
+  formatCopy?: (items: string[]) => string
 }
 
 export function StickerSection({
@@ -18,6 +19,7 @@ export function StickerSection({
   items,
   chipColor,
   emptyText,
+  formatCopy,
 }: Props) {
   const t = useT()
   const [open, setOpen] = useState(false)
@@ -25,7 +27,8 @@ export function StickerSection({
 
   function handleCopy(e: React.MouseEvent) {
     e.stopPropagation()
-    navigator.clipboard.writeText(items.map((i) => i.toUpperCase()).join(", "))
+    const text = formatCopy ? formatCopy(items) : items.map((i) => i.toUpperCase()).join(", ")
+    navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
